@@ -54,7 +54,9 @@ RUN true \
   update-ca-trust \
   update-ca-trust extract
 
-# Install Filetranspiler
+# Install latest Butane binary to modify machineConfigs
+RUN curl -o /usr/bin/butane -O https://mirror.openshift.com/pub/openshift-v4/clients/butane/latest/butane \
+  && chmod +x /usr/bin/butane
 
 # Install coreos-installer
 RUN true \
