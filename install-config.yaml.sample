@@ -1,0 +1,43 @@
+---
+apiVersion: v1
+baseDomain: <base domain name>
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: <cluster name>
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 192.168.1.0/24
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+pullSecret: ''
+sshKey: 'ssh-rsa ....'
+fips: false
+publish: External
+# Note: Put the AWS API CA below to enable the cluster to communicate with the AWS API
+#       This has not been tested on the snowball series of devices.
+# TODO: Check if the AWS EBS CSI Storage Driver supports the snowball series of devices.
+additionalTrustBundle: |
+  < Private Registry CA bundle>
+# Note: Use the below section only for disconnected/air-gapped installs where the
+#       OpenShift container content is hosted in your own private registry
+imageContentSources:
+- mirrors:
+  - <mirror registry hostname and port, no protocol>/openshift/release
+  source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+- mirrors:
+  - <mirror registry hostname and port, no protocol>/openshift/release-images
+  source: quay.io/openshift-release-dev/ocp-release
+
