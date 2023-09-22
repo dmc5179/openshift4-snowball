@@ -26,6 +26,8 @@ sudo restorecon -v /etc/pki/ca-trust/source/anchors/snowcone_cert.pem
 sudo update-ca-trust
 sudo update-ca-trust extract
 
+snowballEdge start-service --service-id service_id --virtual-network-interface-arns virtual-network-interface-arn
+
 # List access keys
 snowballEdge list-access-keys
 
