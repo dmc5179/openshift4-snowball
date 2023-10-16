@@ -54,6 +54,7 @@ echo "Content Snapshot import ID: ${CONTENT_IMPORT_ID}"
 
 # Wait for the snapshot import to complete
 x="unknown"
+echo "Snapshot import takes 5-10 minutes in most cases"
 date
 while [[ "$x" != "completed" ]]
 do
@@ -61,7 +62,6 @@ do
   x=$(${EC2} describe-import-snapshot-tasks --import-task-ids ${CONTENT_IMPORT_ID} | jq -r '.ImportSnapshotTasks[0].SnapshotTaskDetail.Status')
   sleep 5
 done
-date
 
 # Get the imported snapshot ID
 CONTENT_SNAPSHOT=$(${EC2} describe-import-snapshot-tasks --import-task-ids ${CONTENT_IMPORT_ID} | jq -r '.ImportSnapshotTasks[0].SnapshotTaskDetail.SnapshotId')
