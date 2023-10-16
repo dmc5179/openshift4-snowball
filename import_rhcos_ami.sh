@@ -70,7 +70,9 @@ sleep 5
 
 # Register the AMI
 RHCOS_AMI=$(${EC2} register-image \
-  --output text \
+  --ena-support \
+   --output text \
+  --architecture 'x86_64' \
   --name "rhcos-${RHCOS_VER}" \
   --description "rhcos-${RHCOS_VER}" \
   --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"SnapshotId\":\"${RHCOS_SNAPSHOT}\",\"VolumeType\":\"${VOL_TYPE}\",\"DeleteOnTermination\":true}}]" \

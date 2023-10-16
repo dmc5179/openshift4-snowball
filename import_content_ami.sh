@@ -74,7 +74,9 @@ sleep 5
 
 # Register the AMI using the imported snapshot and get the new AMI ID
 CONTENT_AMI=$(${EC2} register-image \
+  --ena-support \
   --output text \
+  --architecture 'x86_64' \
   --name "ocp4-${OCP_VER}-content" \
   --description "ocp4-${OCP_VER}-content" \
   --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"SnapshotId\":\"${CONTENT_SNAPSHOT}\",\"VolumeType\":\"${VOL_TYPE}\",\"DeleteOnTermination\":true}}]" \
