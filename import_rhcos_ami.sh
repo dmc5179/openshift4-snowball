@@ -5,18 +5,22 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${SCRIPT_DIR}/env.sh"
 
 # Get the RHCOS image name
-RHCOS_IMG=$(ls -1 /opt/openshift/rhcos/rhcos*)
+RHCOS_VMDK=$(ls -1 /opt/openshift/rhcos/rhcos*.vmdk.gz)
 
-extension=${RHCOS_IMG##*.}
+extension=${RHCOS_VMDK##*.}
 
 # If the file is compressed, decompress it and change file var
 if [[ "${extension}" == "gz" ]]
 then
-  gunzip "${RHCOS_IMG}"
-  RHCOS_IMG="${RHCOS_IMG%.*}"
+  gunzip "${RHCOS_VMDK}"
+  RHCOS_VMDK="${RHCOS_IMG%.*}"
 fi
 
-echo ${RHCOS_IMG}
+RHCOS_IMG="${RHCOS_IMG%.*}.img"
+
+# Convert RHCOS VMDK into RAW disk
+# SBE only allows import of RAW disks
+qemu-img convert -f vmdk -O raw ${RHCOS_VMDK} ${RHCOS_IMG}
 
 ##############################################
 # RHCOS Snapshot
@@ -62,6 +66,9 @@ RHCOS_AMI=$(${EC2} register-image \
   --description "rhcos-${RHCOS_VER}" \
   --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"SnapshotId\":\"${RHCOS_SNAPSHOT}\",\"VolumeType\":\"sbp1\",\"DeleteOnTermination\":true}}]" \
   --root-device-name /dev/sda1)
+
+# Update the env script to have the new AMI ID
+sed -i "s|SBE-AMI|${RHCOS_AMI}|" env.sh
 
 echo "RHCOS AMI: ${RHCOS_AMI}"
 
