@@ -22,6 +22,29 @@ RHCOS_IMG="${RHCOS_IMG%.*}.img"
 # SBE only allows import of RAW disks
 qemu-img convert -f vmdk -O raw ${RHCOS_VMDK} ${RHCOS_IMG}
 
+# Increase size of disk to 75 GBs
+qemu-img resize -f raw "${RHCOS_IMG}" +50G
+
+# Mount IMG as loopback
+sudo losetup -D
+sudo losetup -f -P "${RHCOS_IMG}"
+
+# Increase partition #4 to new size
+parted -s /dev/loop0 resizepart 4 100%
+
+# Discover partitions inside IMG file
+sudo kpartx -av disk_image.raw 
+
+# Mount root partition from IMG file
+sudo mount /dev/mapper/.... /mnt/rhcos
+
+# Grow XFS Root partition
+xfs_growfs /mnt/rhcos
+
+# Unmount
+sudo umount /mnt/rhcos
+sudo losetup -D
+
 ##############################################
 # RHCOS Snapshot
 
