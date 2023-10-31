@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+baseDomain: "{{ ocp_base_domain }}"
+{% if credentials_mode is defined %}
+credentialsMode: "{{ credentials_mode }}"
+{% endif %}
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: {{ worker_count }}
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: "{{ ocp_cluster_name }}"
+networking:
+  clusterNetwork:
+  - cidr: "{{ cluster_network_cidr }}"
+    hostPrefix: {{ cluster_network_prefix }}
+  networkType: "{{ ocp_sdn }}"
+  serviceNetwork:
+  - "{{ service_network_cidr }}"
+platform:
+  none: {}
+pullSecret: '{{ slurped_pull_secret_b64.content | b64decode | trim }}'
+sshKey: '{{ ssh_public_key | trim }}'
+fips: {{ fips_enabled | bool | lower }}
+publish: "{{ ocp_cluster_publish }}"
+additionalTrustBundle: |
+{{ slurped_aws_api_ca_bundle_64.content | b64decode | trim }}
+{{ slurped_registry_ca_bundle_b64.content | b64decode | trim }}
+imageContentSources:
+- mirrors:
+  - {{ mirror_registry }}:{{ mirror_registry_port }}/openshift/release-images
+  source: quay.io/openshift-release-dev/ocp-release
+- mirrors:
+  - {{ mirror_registry }}:{{ mirror_registry_port }}/openshift/release
+  source: quay.io/openshift-release-dev/ocp-v4.0-art-dev

@@ -1,0 +1,90 @@
+---
+# defaults file for install_bind
+
+bind_log: "data/named.run"
+
+# List of acls.
+bind_acls: []
+
+# Key binding for slaves
+bind_dns_keys: []
+#  - name: master_key
+#    algorithm: hmac-sha256
+#    secret: "azertyAZERTY123456"
+
+# List of IPv4 address of the network interface(s) to listen on. Set to "any"
+# to listen on all interfaces
+bind_listen_ipv4:
+  - "any"
+
+# List of IPv6 address of the network interface(s) to listen on.
+bind_listen_ipv6:
+  - "::1"
+
+# List of hosts that are allowed to query this DNS server.
+bind_allow_query:
+  - "any"
+
+bind_check_names: 'master ignore'
+
+# Determines whether recursion should be allowed. Typically, an authoritative
+# name server should have recursion turned OFF.
+bind_recursion: true
+bind_allow_recursion:
+  - "any"
+
+# Allows BIND to be set up as a caching name server
+bind_forward_only: false
+
+# List of name servers to forward DNS requests to.
+bind_forwarders:
+  - '34.223.14.129'
+  - '8.8.8.8'
+
+# DNS round robin order (random or cyclic)
+bind_rrset_order: "random"
+
+# statistics channels configuration
+bind_statistics_channels: false
+bind_statistics_port: 8053
+bind_statistics_host: '127.0.0.1'
+bind_statistics_allow:
+  - "127.0.0.1"
+
+# DNSSEC configuration
+bind_dnssec_enable: false
+bind_dnssec_validation: false
+
+bind_extra_include_files: []
+
+# SOA information
+bind_zone_ttl: "1W"
+bind_zone_time_to_refresh: "1D"
+bind_zone_time_to_retry: "1H"
+bind_zone_time_to_expire: "1W"
+bind_zone_minimum_ttl: "1D"
+bind_zone_master_server_ip: '34.223.14.195'
+
+# File mode for master zone files (needs to be something like 0660 for dynamic updates)
+bind_zone_file_mode: "0640"
+
+dns_zone_one: 'sbe.io'
+
+# Sample config for a DNS facing 2 zones
+bind_zone_domains:
+  - name: "{{ dns_zone_one }}"
+    create_reverse_zones: true
+    create_forward_zones: true
+    name_servers:
+      - 'bastion'
+    hosts:
+      - name: "bastion"
+        ip: "34.223.14.195"
+      - name: "api.ocp4"
+        ip: "34.223.14.195"
+      - name: "api-int.ocp4"
+        ip: "34.223.14.195"
+      - name: "*.apps.ocp4"
+        ip: "34.223.14.195"
+    networks:
+      - '34.223.14'

@@ -1,0 +1,7 @@
+setuptools_rust
+wheel
+jinja2
+awscli
+boto3
+botocore
+jmespath

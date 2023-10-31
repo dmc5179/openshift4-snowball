@@ -1,0 +1,79 @@
+---
+- name: Ensure HAProxy is installed.
+  become: true
+  package:
+    name: haproxy
+    state: present
+
+- name: Install dependencies
+  package:
+    name: '{{ haproxy_rhel8_deps }}'
+    state: present
+  when: >
+    (ansible_distribution == "CentOS" and
+    ansible_distribution_major_version >= '8') or
+    (ansible_distribution == "RedHat" and
+    ansible_distribution_major_version >= '8')
+
+- name: Configure SELinux TCP ports for HAProxy
+  become: true
+  community.general.seport:
+    ports: 80,443,22623,6443,9000
+    proto: tcp
+    setype: http_port_t
+    state: present
+  when:   
+    - ansible_selinux.status is defined
+    - ansible_selinux.status == "enabled"
+  notify:
+    - restart haproxy
+
+- name: Configure SELinux UDP ports for HAProxy
+  become: true
+  community.general.seport:
+    ports: 80,443,22623,6443,9000
+    proto: udp
+    setype: http_port_t
+    state: present
+  when:   
+    - ansible_selinux.status is defined
+    - ansible_selinux.status == "enabled"
+  notify:
+    - restart haproxy
+
+- name: Copy HAProxy configuration in place.
+  become: true
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: 0644
+    validate: haproxy -f %s -c -q
+  notify: restart haproxy
+
+- name: Populate service facts
+  service_facts:
+
+- name: Configure firewall for haproxy
+  firewalld:
+    permanent: true
+    immediate: true
+    state: enabled
+    port: "{{ item }}"
+  with_items:
+    - 6443/tcp
+    - 6443/udp
+    - 22623/tcp
+    - 22623/udp
+    - 443/tcp
+    - 80/tcp
+    - 8080/tcp
+  when:
+    ('firewalld.service' in services) and
+    (ansible_facts.services["firewalld.service"].state is match("running"))
+
+#- name: Ensure HAProxy is started and enabled on boot.
+#  become: true
+#  service:
+#    name: haproxy
+#    state: started
+#    enabled: true

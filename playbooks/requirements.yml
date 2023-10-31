@@ -1,0 +1,8 @@
+---
+collections:
+  - amazon.aws
+  - community.aws
+  - community.crypto
+  - ansible.posix
+  - community.general
+  - ansible.netcommon
