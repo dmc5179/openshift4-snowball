@@ -36,7 +36,7 @@ parted -s /dev/loop0 resizepart 4 100%
 sudo kpartx -av disk_image.raw 
 
 # Mount root partition from IMG file
-sudo mount /dev/mapper/.... /mnt/rhcos
+sudo mount /dev/mapper/loop0p4 /mnt/rhcos
 
 # Grow XFS Root partition
 xfs_growfs /mnt/rhcos
