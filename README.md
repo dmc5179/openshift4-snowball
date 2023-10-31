@@ -66,7 +66,22 @@ snow associate-address --public-ip <IP to assign> --instance-id <Content_Instanc
 
 - Login to the Content Instance running on the SBE
 
-- Run the following script to load the RHCOS disk image from
+- Run the following script to load the RHCOS disk image into the SBE
 ```
 import_rhcos_ami.sh
+```
+
+- Run the following script to configure the environment
+```
+./configure.sh
+```
+
+- Run the following script to setup the environment
+```
+./setup.sh
+```
+
+- Run the following script to deploy the OpenShift cluster
+```
+./deploy_openshift.sh
 ```
