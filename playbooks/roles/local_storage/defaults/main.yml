@@ -1,0 +1,20 @@
+---
+
+local_storage_namespace: 'local-storage'
+local_storage_operator_channel: 'stable'
+
+#ocp_cluster_name: 'icsa'
+#ocp_base_domain: 'iad.redhat.com'
+
+
+kubeconfig: '/opt/openshift/cluster/auth/kubeconfig'
+kube_ssl_enabled: false
+
+local_storage_nodes:
+  - name: ip-34-223-14-196
+  - name: ip-34-223-14-197
+  - name: ip-34-223-14-230
+
+device_path: '/dev/vda'
+
+local_storage_is_default: false
