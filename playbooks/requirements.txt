@@ -5,3 +5,4 @@ awscli
 boto3
 botocore
 jmespath
+kubernetes
