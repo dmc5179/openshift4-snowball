@@ -57,14 +57,31 @@ alias ec2="aws --profile snowballEdge --region snow --endpoint https://< SNOWBAL
 import_content_ami.sh <s3_bucket> <s3_path>
 ```
 
-- Launch the OpenShift Content AMI as an EC2 Instance
+- Launch the OpenShift Content AMI as an EC2 Instance from outside the snowball device
 ```
 snow run-instances --image-id <Content_AMI_ID> --key-name <my_key_name> --instance-type sbe-c.2xlarge
 
 snow associate-address --public-ip <IP to assign> --instance-id <Content_Instance_ID>
 ```
 
+- Copy the SnowBall Edge Manifest to the Content Instance.
+
 - Login to the Content Instance running on the SBE
+
+- Change directories into the openshift4-snowball directory
+```
+cd /home/ec2-user/openshift4-snowball
+```
+
+- Run the following script to configure the snowballEdge client
+```
+./configure_snowball_client.sh
+```
+
+- Run the following script to configure the environment
+```
+./configure.sh
+```
 
 - Run the following script to load the RHCOS disk image into the SBE
 ```

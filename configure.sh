@@ -2,15 +2,8 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Script to take in
-# - SBE API Endpoint
-# - Location of Manifest File
-# - SBE Unlock Code
+# Script to take in configuration variables used by ansible and other scripts
 
-read -p "Enter SnowBall Edge API Endpoint IP Address:  " endpoint
-read -p "Enter path to manifest file: " manifest
-read -p "Enter Unlock Code: " unlock
-read -p "Enter path to SnowBall CA Bundle file: " ca_bundle
 read -p "Enter S3 bucket to use on SnowBall: " s3_bucket
 read -p "Enter OpenShift base domain name (i.e. mycluster.io): " base_domain
 read -p "Enter OpenShift cluster name (i.e ocp4): " cluster_name
@@ -21,41 +14,7 @@ read -p "Enter Master 0 IP Address: " master0_ip
 read -p "Enter Master 1 IP Address: " master1_ip
 read -p "Enter Master 2 IP Address: " master2_ip
 
-echo $endpoint
-echo $manifest
-echo $unlock
-echo $ca_bundle
-echo $s3_bucket
-
-if ! ping -c 1 "${endpoint}" 2>&1 > /dev/null
-then
-  echo "Endpoint IP Address unreachable, please retry"
-  exit 1
-fi
-
-if ! test -f "${manifest}"
-then
-  echo "${manifest} file not found, please retry"
-  exit 1
-fi
-
-if ! test -f "${ca_bundle}"
-then
-  echo "${ca_bundle} file not found, please retry"
-  exit 1
-fi
-
-exit 0
-
 # - Configure the env.sh file with values passed in to this script
-sed -i "s|export ENDPOINT=.*|export ENDPOINT=\"$endpoint\"|" "${SCRIPT_DIR}/env.sh"
-
-sed -i "s|export MANIFEST=.*|export MANIFEST=\"$manifest\"|" "${SCRIPT_DIR}/env.sh"
-
-sed -i "s|export UNLOCK=.*|export UNLOCK=\"$unlock\"|" "${SCRIPT_DIR}/env.sh"
-
-sed -i "s|export CA_BUNDLE=.*|export CA_BUNDLE=\"$ca_bundle\"|" "${SCRIPT_DIR}/env.sh"
-
 sed -i "s|export S3_BUCKET=.*||" "${SCRIPT_DIR}/env.sh"
 
 sed -i "s|export BOOTSTRAP_IP=.*|export BOOTSTRAP_IP=\"$bootstrap_ip\"|" "${SCRIPT_DIR}/env.sh"
