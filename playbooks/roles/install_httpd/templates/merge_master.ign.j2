@@ -3,7 +3,7 @@
     "config": {
       "merge": [
         {
-          "source": "http://34.223.14.194:8080/ignition/master.ign",
+          "source": "http://{{ ansible_default_ipv4.address }}:{{ httpd_port }}/ignition/master.ign",
           "verification": {}
         }
       ]
