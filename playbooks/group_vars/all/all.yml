@@ -50,7 +50,7 @@ fips_enabled: false
 
 certificate_bundle: '/etc/pki/ca-trust/source/anchors/quay.cert'
 # Certificate bundle for the AWS API
-aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snowcone_cert.pem'
+aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snow_cert.pem'
 
 cluster_network_cidr: '10.128.0.0/14'
 

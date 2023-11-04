@@ -14,7 +14,7 @@ aws_ssl_enabled: true
 ec2_key_name: ''
 
 # Certificate bundle for the AWS API
-aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snowcone_cert.pem'
+aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snow_cert.pem'
 
 ec2_instance_type:
   bootstrap: "i3.large"

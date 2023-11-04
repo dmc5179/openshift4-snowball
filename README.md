@@ -48,8 +48,8 @@ snow create-key-pair --key-name <my_key_name>
 
 - It is a good idea to alias the ec2 and s3 commands as the required options are long. Note that the services run on different ports. Include the IP address of the SBE itself.
 ```
-alias s3="aws --profile snowballEdge --region snow  --endpoint https://< SNOWBALL_IP >:8443 --ca-bundle /etc/pki/ca-trust/source/anchors/sbe.crt s3"
-alias ec2="aws --profile snowballEdge --region snow --endpoint https://< SNOWBALL_IP >:8243 --ca-bundle /etc/pki/ca-trust/source/anchors/sbe.crt ec2"
+alias s3="aws --profile snowballEdge --region snow  --endpoint https://< SNOWBALL_IP >:8443 --ca-bundle /etc/pki/ca-trust/source/anchors/snow_cert.pem s3"
+alias ec2="aws --profile snowballEdge --region snow --endpoint https://< SNOWBALL_IP >:8243 --ca-bundle /etc/pki/ca-trust/source/anchors/snow_cert.pem ec2"
 ```
 
 - Run the following script to load the OpenShift Content AMI from S3 on the SBE into EC2 on the SBE
