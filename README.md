@@ -88,11 +88,6 @@ cd /home/ec2-user/openshift4-snowball
 import_rhcos_ami.sh
 ```
 
-- Run the following script to configure the environment
-```
-./configure.sh
-```
-
 - Run the following script to setup the environment
 ```
 ./setup.sh
