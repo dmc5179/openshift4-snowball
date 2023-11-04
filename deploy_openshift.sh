@@ -7,8 +7,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 source "${SCRIPT_DIR}/env.sh"
 
-BOOTSTRAP_UD="merge_bootstrap.ign"
-MASTER_UD="merge_master.ign"
+# These files are installed by the httpd ansible role
+# Do not change these unless using a non-default merge file
+BOOTSTRAP_UD="/var/www/html/ignition/merge_bootstrap.ign"
+MASTER_UD="/var/www/html/ignition/merge_master.ign"
 
 MY_IP=$(hostname -i)
 
@@ -26,6 +28,7 @@ popd
 
 #exit 0
 
+# TODO: Create jmes query from ec2 describe-instances to find OCP nodes
 # Write instance ids to file
 rm -f /tmp/ocp_instances.txt
 touch /tmp/ocp_instances.txt
