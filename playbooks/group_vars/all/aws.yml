@@ -1,0 +1,42 @@
+---
+
+aws_profile: "snowballEdge"
+
+rhcos_ami: ''
+
+ec2_endpoint: ''
+s3_endpoint: ''
+#iam_endpoint:  'https://'
+#sts_endpoint: 'https://'
+
+aws_ssl_enabled: true
+
+ec2_key_name: ''
+
+# Certificate bundle for the AWS API
+aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snowcone_cert.pem'
+
+ec2_instance_type:
+  bootstrap: "i3.large"
+  master: "m5.xlarge"
+  worker: "m5.2xlarge"
+
+# TODO: IAM not supported yet
+#ec2_iam_role:
+#  bootstrap: "openshift4-boostrap-role"
+#  master: "openshift4-master-role"
+#  worker: "openshift4-worker-role"
+
+ec2_sg:
+  master:
+    id: 'sg-'
+    name: 'default'
+  worker:
+    id: ''
+    name: 'default'
+
+#########################################################################
+# Variable related to staging ignition files in S3
+s3_bucket: '2443-snow-3'
+s3_path: 'ignition'
+

@@ -1,0 +1,84 @@
+---
+
+# TODO: What happens when we don't fill these in
+#rhcos_ver:
+#ocp_ver:
+
+openshift_install: 'openshift-install'
+openshift_client: 'oc'
+kubectl: 'kubectl'
+kubeconfig: "{{ ansible_env.HOME }}/.kube/config"
+
+mirror_base: '/opt/openshift/'
+
+ignition_configs: '{{ mirror_base }}/cluster'
+
+pull_secret: '/home/ec2-user/pull-secret.txt'
+
+master_scheduleable: true
+
+#TODO: See if this var can be removed
+#cluster_channel: 'stable-{{ocp_ver:3}}'
+
+ssh_key_file: '/home/ec2-user/.ssh/id_rsa.pub'
+
+ocp_base_domain: 'sbe.io'
+
+ocp_cluster_name: 'ocp4'
+
+ocp_cluster_name_verbose: '{{ ocp_cluster_name}}.{{ ocp_base_domain }}'
+
+infrastructure_id: 'abc12'
+
+ocp_sdn: 'OVNKubernetes'
+
+# External is not yet supported by the custom Cloudformation templates in this repo
+ocp_cluster_publish: 'External'
+
+converged: true
+single_node: false
+master_count: 3
+worker_count: 0
+
+mirror_registry: '{{ ansible_env.HOSTNAME }}'
+
+mirror_registry_port: 8443
+
+mirror_transport: 'https'
+
+fips_enabled: false
+
+certificate_bundle: '/etc/pki/ca-trust/source/anchors/quay.cert'
+# Certificate bundle for the AWS API
+aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snowcone_cert.pem'
+
+cluster_network_cidr: '10.128.0.0/14'
+
+cluster_network_prefix: 23
+
+service_network_cidr: '172.30.0.0/16'
+
+# Note: Do not set this equal to the AWS commercial MTU when installing in C2S
+#mtu: 8500
+#vxlanPort: 4789
+
+network_policy: 'NetworkPolicy'
+
+# TODO: Try to remove these options
+pip_cmd: 'pip3.9'
+pip_args: ''
+
+kube_ssl_enabled: false
+
+stage_ignition: true
+
+# Default location of this CR within the Quay registry AMI
+# TODO: results-XYZ seems random, how can we predict that directory
+# Need to add a glob task
+#  - name: Identify results directories
+#    find:
+#      paths: '{{ remote_mirror_data_dir }}/oc-mirror-workspace'
+#      file_type: directory
+#      patterns: "results-*"
+#    register: results
+#update_service_cr_location: "/oc-mirror-workspace/results-1678360307/updateService.yaml"
