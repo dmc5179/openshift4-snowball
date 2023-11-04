@@ -7,71 +7,136 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 source "${SCRIPT_DIR}/env.sh"
 
-BOOTSTRAP_ENI=""
-MASTER0_ENI=""
-MASTER1_ENI=""
-MASTER2_ENI=""
+BOOTSTRAP_UD="merge_bootstrap.ign"
+MASTER_UD="merge_master.ign"
+
+MY_IP=$(hostname -i)
 
 # Generate Ignition Configs
-#echo "Generating Ignition Configuration"
-#pushd "${SCRIPT_DIR}/playbooks"
-#ansible-playbook generate_ignition.yaml
-#popd
+echo "Generating Ignition Configuration"
+pushd "${SCRIPT_DIR}/playbooks"
+ansible-playbook -e ansible_python_interpreter=/usr/bin/python3.9 generate_ignition.yaml
+popd
 
 # Stage Ignition Configs in S3
-#echo "Staging Ignition Configs in local httpd server"
-#./stage_ignition.sh
+echo "Staging Ignition Configs in local httpd server"
+pushd "${SCRIPT_DIR}/playbooks"
+ansible-playbook -e ansible_python_interpreter=/usr/bin/python3.9 stage_ignition.yaml
+popd
 
-# Create custom RAW disk files for the bootstrap and control plane nodes
-./load_custom_amis.sh
-#TODO: Not getting the bootstrap and master AMI IDs back from this script
-# TODO: create VNI nic. Assign at launch 
-# TODO: Don't create VNIs outside the SBE CIDR or S3 will not start
+#exit 0
+
+# Write instance ids to file
+rm -f /tmp/ocp_instances.txt
+touch /tmp/ocp_instances.txt
 
 # Deploy Bootstrap node
-# TODO: User data is limited to 16KB which is too small for the bootstrap
-#       Need to include ignition config that points bootstrap to S3
-#ENCODED_USER_DATA=$(jq -r -c '.' append_ignition.ign | base64 -w 0)
-BOOTSTRAP_INST_ID=$(${EC2} run-instances --image-id ${BOOTSTRAP_AMI} \
+BOOTSTRAP_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${BOOTSTRAP_UD}" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Bootstrap}]' \
-  --instance-type sbe-c.2xlarge | jq -r '.Instances[0].InstanceId')
+  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
 
 echo "Bootstrap Instance ID: ${BOOTSTRAP_INST_ID}"
+echo "${BOOTSTRAP_INST_ID}" >> /tmp/ocp_instances.txt
 
 # Need to wait for instance to reach a certain state before we can associate and address
-#sleep 20
-until [[ `$EC2 describe-instances --instance-ids ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+state="x"
+until [[ "$state" == "running" ]]
 do
   echo "Waiting for bootstrap to reach running state for VNI attachment...."
-  echo -n "Current state: "
-  $EC2 describe-instances --instance-ids ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  state=$($EC2 describe-instances --instance-ids ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name')
+  echo "Current state: ${state} "
   sleep 5
 done
 
-$EC2 associate-address --instance-id ${BOOTSTRAP_INST_ID} --public-ip 192.168.1.247
+$EC2 associate-address --instance-id ${BOOTSTRAP_INST_ID} --public-ip "${BOOTSTRAP_IP}"
+
+BOOTSTRAP_PRIVATE_IP=$($EC2 describe-instances --instance-id ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Bootstrap private ip: ${BOOTSTRAP_PRIVATE_IP}"
+
+#exit 0
+
+#########################################################################################################
+# Master 0
+
+MASTER0_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${MASTER_UD}" \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master0}]' \
+  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
+
+echo "Master 0 Instance ID: ${MASTER0_INST_ID}"
+echo "${MASTER0_INST_ID}" >> /tmp/ocp_instances.txt
+
+# Need to wait for instance to reach a certain state before we can associate and address
+until [[ `$EC2 describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+do
+  echo "Waiting for master 0 to reach running state for VNI attachment...."
+  echo -n "Current state: "
+  $EC2 describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  sleep 5
+done
+
+$EC2 associate-address --instance-id ${MASTER0_INST_ID} --public-ip "${MASTER0_IP}"
+
+MASTER0_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
 
 
-#MASTER0_INST_ID=$(${EC2} run-instances --image-id ${MASTER_AMI} \
-#  --instance-type sbe-c.2xlarge | jq -r '.Instances[0].InstanceId')
+############################################################################################################
+# Master 1
+MASTER1_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${MASTER_UD}" \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master1}]' \
+  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
 
-#MASTER1_INST_ID=$(${EC2} run-instances --image-id ${MASTER_AMI} \
-#  --instance-type sbe-c.2xlarge | jq -r '.Instances[0].InstanceId')
+echo "Master 1 Instance ID: ${MASTER1_INST_ID}"
+echo "${MASTER1_INST_ID}" >> /tmp/ocp_instances.txt
 
-#MASTER2_INST_ID=$(${EC2} run-instances --image-id ${MASTER_AMI} \
-#  --instance-type sbe-c.2xlarge | jq -r '.Instances[0].InstanceId')
+# Need to wait for instance to reach a certain state before we can associate and address
+until [[ `$EC2 describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+do
+  echo "Waiting for master 1 to reach running state for VNI attachment...."
+  echo -n "Current state: "
+  $EC2 describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  sleep 5
+done
 
-# Need to wait a few seconds before trying to get the private IP assigned to the instance at launch
-#sleep 5
+$EC2 associate-address --instance-id ${MASTER1_INST_ID} --public-ip "${MASTER1_IP}"
 
-#BOOTSTRAP_IP=$(${EC2} describe-instances --instance-ids ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-#MASTER0_IP=$(${EC2} describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-#MASTER1_IP=$(${EC2} describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-#MASTER2_IP=$(${EC2} describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+MASTER1_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
 
-#echo "Bootstrap IP: ${BOOTSTRAP_IP}"
+echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
 
-############################################
-#TODO:  After OCP nodes are started, update the DNS configuration to use their new IP addresses if needed
+##########################################################################################################
+# Master 2
+MASTER2_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${MASTER_UD}" \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master2}]' \
+  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
+
+echo "Master 2 Instance ID: ${MASTER2_INST_ID}"
+echo "${MASTER2_INST_ID}" >> /tmp/ocp_instances.txt
+
+# Need to wait for instance to reach a certain state before we can associate and address
+until [[ `$EC2 describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+do
+  echo "Waiting for master 2 to reach running state for VNI attachment...."
+  echo -n "Current state: "
+  $EC2 describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  sleep 5
+done
+
+$EC2 associate-address --instance-id ${MASTER2_INST_ID} --public-ip "${MASTER2_IP}"
+
+MASTER2_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
+
+echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
+echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
+echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
 
 
 #exit 0
