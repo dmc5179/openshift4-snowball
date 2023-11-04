@@ -1,23 +1,15 @@
 ---
 
-- name: Stage Ignition configs (S3)
+- name: Stage ignition files (httpd)
+  become: true
   delegate_to: localhost
-  amazon.aws.s3_object:
-    #aws_access_key: "{{ ansible_env.AWS_ACCESS_KEY_ID | default(omit) }}"
-    #aws_secret_key: "{{ ansible_env.AWS_SECRET_ACCESS_KEY | default(omit) }}"
-    #session_token: "{{ ansible_env.AWS_SESSION_TOKEN | default(omit) }}"
-    profile: "{{ aws_profile | default(omit) }}"
-    #region: "{{ ansible_env.AWS_DEFAULT_REGION | default(omit) }}"
-    endpoint_url: "{{ s3_endpoint }}"
-    aws_ca_bundle: "{{ aws_certificate_bundle }}"
-    validate_certs: "{{ aws_ssl_enabled }}"
-    bucket: "{{ s3_bucket }}"
-    object: "{{ s3_path }}/{{ item }}"
-    src: "{{ ignition_configs }}/{{ item }}"
-    mode: put
-    #permission: "public-read"
-    overwrite: "always"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/var/www/html/ignition/"
+    owner: root
+    group: root
+    mode: 0444
   loop:
-    - 'bootstrap.ign'
-    - 'master.ign'
-    - 'worker.ign'
+    - "/opt/openshift/cluster/bootstrap.ign"
+    - "/opt/openshift/cluster/master.ign"
+    - "/opt/openshift/cluster/worker.ign"
