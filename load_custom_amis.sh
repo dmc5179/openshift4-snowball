@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+# Note, this script is no longer used and can probably be removed from the baseline
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 source "${SCRIPT_DIR}/env.sh"
