@@ -11,7 +11,7 @@ httpd_port: 8080
 httpd_ssl_servername: "{{ ansible_fqdn }}"
 
 # For SSL a TCP port is required.
-httpd_ssl_port: 8443
+httpd_ssl_port: 9443
 
 # Set ProxyPreserveHost
 httpd_proxy_preserve_host: true
