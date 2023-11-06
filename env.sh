@@ -11,7 +11,7 @@ export CA_BUNDLE=""
 export EC2_PORT=""
 export S3_PORT=""
 export S3_BUCKET=""
-export SSH_LEY=""
+export SSH_KEY=""
 # IPs should map to VNIs on the SBE
 export BOOTSTRAP_IP=""
 export MASTER0_IP=""
