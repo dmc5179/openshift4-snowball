@@ -49,4 +49,12 @@ sudo update-ca-trust extract
 
 sed -i "s|export CA_BUNDLE=.*|export CA_BUNDLE=\"$ca_bundle\"|" "${SCRIPT_DIR}/env.sh"
 
+# Configure the EC2 and S3 port numbers
+ec2_port=$(snowballEdge describe-service ${OPTS} --service-id ec2 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+s3_port=$(snowballEdge describe-service ${OPTS} --service-id s3 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+
+sed -i "s|export EC2_PORT=.*|export EC2_PORT=\"$ec2_port\"|" "${SCRIPT_DIR}/env.sh"
+
+sed -i "s|export S3_PORT=.*|export S3_PORT=\"$s3_port\"|" "${SCRIPT_DIR}/env.sh"
+
 exit 0
