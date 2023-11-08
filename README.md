@@ -43,7 +43,7 @@ snowballEdge get-secret-access-key --access-key-id "access_key from above comman
 
 - Create a key-pair for instances to use
 ```
-snow create-key-pair --key-name <my_key_name>
+snowballEdge create-key-pair --key-name <my_key_name>
 ```
 
 - It is a good idea to alias the ec2 and s3 commands as the required options are long. Note that the services run on different ports. Include the IP address of the SBE itself.
@@ -59,9 +59,9 @@ import_content_ami.sh <s3_bucket> <s3_path>
 
 - Launch the OpenShift Content AMI as an EC2 Instance from outside the snowball device
 ```
-snow run-instances --image-id <Content_AMI_ID> --key-name <my_key_name> --instance-type sbe-c.2xlarge
+snowballEdge run-instances --image-id <Content_AMI_ID> --key-name <my_key_name> --instance-type sbe-c.2xlarge
 
-snow associate-address --public-ip <IP to assign> --instance-id <Content_Instance_ID>
+snowballEdge associate-address --public-ip <IP to assign> --instance-id <Content_Instance_ID>
 ```
 
 - Copy the SnowBall Edge Manifest to the Content Instance.
