@@ -11,7 +11,13 @@ Tool to deploy OpenShift 4 on an AWS Snowball Edge Device
      * [Extract AWS API Keys](#extract)
      * [Create EC2 Keypair](#keypair)
      * [Configure SBE Client](#client-configure)
-   
+   * [Import OpenShift Content AMI](#import-content-ami)
+   * [Deploying OpenShift to the SBE](#deploy-openshift)
+     * [Configure Snowball Client on the Content Instance](#content-client-configure)
+     * [Configure Environemt on the Content Instance](#content-environment)
+     * [Import Red Hat Core OS (RHCOS) AMI](#import-rhcos)
+     * [Deploy Required services on the Content Instance](#deploy-servies)
+     * [Deploy OpenShift Cluster](#deploy-openshift)
 
 # Configuring SBE External Host
 
@@ -39,7 +45,7 @@ echo ${NIC_ID}
 snowballEdge create-virtual-network-interface --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --ip-address-assignment dhcp --physical-network-interface-id "${NIC_ID}"
 ```
 
-# Start the EC2 and S3 services on the SBE
+## Start the EC2 and S3 services on the SBE
 
 - Start the ec2 and s3 services on the Snowball Device using the virtual network interface created above.
 ```
@@ -47,7 +53,7 @@ snowballEdge start-service --service-id ec2 --virtual-network-interface-arns <vi
 snowballEdge start-service --service-id s3 --virtual-network-interface-arns >virtual-network-interface-arn>
 ```
 
-# Extract AWS API Keys
+## Extract AWS API Keys
 
 The AWS API keys should be saved under the snowballEdge profile.
 
@@ -61,14 +67,14 @@ snowballEdge  list-access-keys --endpoint https://<ENDPOINT> --manifest-file <MA
 snowballEdge get-secret-access-key --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --access-key-id "access_key from above command"
 ```
 
-# Create EC2 Keypair
+## Create EC2 Keypair
 
 - Create a key-pair for instances to use
 ```
 snowballEdge create-key-pair --key-name <my_key_name>
 ```
 
-# Configure SBE client
+## Configure SBE client
 
 - Run the configure_snowball_client.sh command to configure the client. This must be done after the EC2 and S3 services have been started to extract the ports those services are running on.
 ```
