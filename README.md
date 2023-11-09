@@ -91,38 +91,50 @@ snowballEdge run-instances --endpoint https://<ENDPOINT> --manifest-file <MANIFE
 snowballEdge associate-address --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --public-ip <IP to assign> --instance-id <Content_Instance_ID>
 ```
 
-# Import Red Hat Core OS (RHCOS) AMI
-
-Red Hat Core OS (RHCOS) is the base operating system of all nodes in an OpenShift cluster. The RHCOS AMI is shipped with the SBE as a disk image located in S3 on the SBE. It must be imported into the SBE as an EC2 AMI
+# Deploying OpenShift to the SBE
 
 - Copy the SnowBall Edge Manifest to the Content Instance.
 
 - Login to the Content Instance running on the SBE as the ec2-user
 
 - Change directories into the openshift4-snowball directory on the content instance
+
 ```
 cd /home/ec2-user/openshift4-snowball
 ```
+
+## Configure Snowball Client on the Content Instance
 
 - Run the following script to configure the snowballEdge client on the content instance
 ```
 ./configure_snowball_client.sh
 ```
 
+## Configure Environemt on the Content Instance
+
 - Run the following script to configure the environment on the content instance
 ```
 ./configure.sh
 ```
+
+## Import Red Hat Core OS (RHCOS) AMI
+
+Red Hat Core OS (RHCOS) is the base operating system of all nodes in an OpenShift cluster. The RHCOS AMI is shipped with the SBE as a disk image located in S3 on the SBE. It must be imported into the SBE as an EC2 AMI
+
 
 - Run the following script to load the RHCOS disk image into the SBE on the content instance
 ```
 import_rhcos_ami.sh
 ```
 
+## Deploy Required services on the Content Instance
+
 - Run the following script to setup the environment on the content instance. This will setup the httpd, bind, and haproxy services.
 ```
 ./setup.sh
 ```
+
+## Deploy OpenShift Cluster
 
 - Run the following script to deploy the OpenShift cluster on the content instance
 ```
