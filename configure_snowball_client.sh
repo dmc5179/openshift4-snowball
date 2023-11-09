@@ -38,14 +38,28 @@ CERT_ARN=$(snowballEdge list-certificates ${OPTS} | jq -r '.Certificates[0].Cert
 # Export the snowcone certificates
 snowballEdge get-certificate ${OPTS} --certificate-arn ${CERT_ARN} > snow_cert.pem
 
-ca_bundle="/etc/pki/ca-trust/source/anchors/snow_cert.pem"
-# Add snowcone certificate to the system trust store and update
-sudo mv snow_cert.pem "${ca_bundle}"
-sudo chown root.root "${ca_bundle}"
-sudo chmod 0444 "${ca_bundle}"
-sudo restorecon "${ca_bundle}"
-sudo update-ca-trust
-sudo update-ca-trust extract
+DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
+if [[ "${DISTRO}" =~ 'Fedora' || "${DISTRO}" =~ 'RHEL' || "${DISTRO}" =~ 'CentOS' ]]
+then
+  ca_bundle="/etc/pki/ca-trust/source/anchors/snow_cert.pem"
+  # Add snowcone certificate to the system trust store and update
+  sudo mv snow_cert.pem "${ca_bundle}"
+  sudo chown root.root "${ca_bundle}"
+  sudo chmod 0444 "${ca_bundle}"
+  sudo restorecon "${ca_bundle}"
+  sudo update-ca-trust
+  sudo update-ca-trust extract
+elif [[ "${DISTRO}" =~ 'Ubuntu' ]]
+then
+  ca_bundle="/usr/local/share/ca-certificates/snow_cert.pem"
+  sudo mv snow_cert.pem "${ca_bundle}"
+  sudo chown root.root "${ca_bundle}"
+  sudo chmod 0444 "${ca_bundle}"
+  sudo update-ca-certificates
+else
+  echo 'Unable to add snowball pem to system trust store. Needs to be done manually'
+  ca_bundle="${PWD}/snow_cert.pem"
+fi
 
 sed -i "s|export CA_BUNDLE=.*|export CA_BUNDLE=\"$ca_bundle\"|" "${SCRIPT_DIR}/env.sh"
 
