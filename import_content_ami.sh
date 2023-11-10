@@ -10,6 +10,13 @@ function usage {
 
 }
 
+# Check that the S3 bucket and S3 path options have been passed in
+if [ "$#" -ne 2 ]
+then
+  echo "Usage: $0 <s3_bucket> <s3_path_to_file>"
+  exit 1
+fi
+
 S3_BUCKET=${1}
 S3_PATH=${2}
 
