@@ -31,8 +31,8 @@ sed -i "s|export SSH_KEY=.*|export SSH_KEY=\"${ssh_key}\"|" "${SCRIPT_DIR}/env.s
 # These we have to discover dynamically so source the env file and query
 source "${SCRIPT_DIR}/env.sh"
 
-ec2_port=$(snowballEdge describe-service ${OPTS} --service-id ec2 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
-s3_port=$(snowballEdge describe-service ${OPTS} --service-id s3 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+ec2_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id ec2 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+s3_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id s3 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
 
 sed -i "s|export EC2_PORT=.*|export EC2_PORT=\"$ec2_port\"|" "${SCRIPT_DIR}/env.sh"
 
