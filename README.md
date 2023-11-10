@@ -49,8 +49,9 @@ snowballEdge create-virtual-network-interface --endpoint https://<ENDPOINT> --ma
 
 - Start the ec2 and s3 services on the Snowball Device using the virtual network interface created above.
 ```
-snowballEdge start-service --service-id ec2 --virtual-network-interface-arns <virtual-network-interface-arn>
-snowballEdge start-service --service-id s3 --virtual-network-interface-arns >virtual-network-interface-arn>
+snowballEdge start-service --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --service-id ec2 --virtual-network-interface-arns <virtual-network-interface-arn>
+
+snowballEdge start-service --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --service-id s3 --virtual-network-interface-arns >virtual-network-interface-arn>
 ```
 
 ## Extract AWS API Keys
@@ -71,7 +72,7 @@ snowballEdge get-secret-access-key --endpoint https://<ENDPOINT> --manifest-file
 
 - Create a key-pair for instances to use
 ```
-snowballEdge create-key-pair --key-name <my_key_name>
+snowballEdge create-key-pair --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --key-name <my_key_name>
 ```
 
 ## Configure SBE client
