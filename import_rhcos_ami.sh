@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xe
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -13,10 +13,10 @@ extension=${RHCOS_VMDK##*.}
 if [[ "${extension}" == "gz" ]]
 then
   gunzip "${RHCOS_VMDK}"
-  RHCOS_VMDK="${RHCOS_IMG%.*}"
+  RHCOS_VMDK="${RHCOS_VMDK%.*}"
 fi
 
-RHCOS_IMG="${RHCOS_IMG%.*}.img"
+RHCOS_IMG="${RHCOS_VMDK%.*}.img"
 
 # Convert RHCOS VMDK into RAW disk
 # SBE only allows import of RAW disks
@@ -29,27 +29,36 @@ qemu-img resize -f raw "${RHCOS_IMG}" +50G
 sudo losetup -D
 sudo losetup -f -P "${RHCOS_IMG}"
 
+# Fix the GPT partition table now that the disk has been resized
+printf "fix\n" | sudo parted ---pretend-input-tty /dev/loop0 print
+
 # Increase partition #4 to new size
-parted -s /dev/loop0 resizepart 4 100%
+sudo parted -s /dev/loop0 resizepart 4 100%
 
 # Discover partitions inside IMG file
-sudo kpartx -av disk_image.raw 
+sudo kpartx -av ${RHCOS_IMG}
 
 # Mount root partition from IMG file
+if ! test -d /mnt/rhcos; then sudo mkdir /mnt/rhcos; fi
 sudo mount /dev/mapper/loop0p4 /mnt/rhcos
 
 # Grow XFS Root partition
-xfs_growfs /mnt/rhcos
+sudo xfs_growfs /mnt/rhcos
 
 # Unmount
 sudo umount /mnt/rhcos
+
+# Remove discovered partitions
+sudo kpartx -dv ${RHCOS_IMG}
+
+# Ensure loop device is unmounted
 sudo losetup -D
 
 ##############################################
 # RHCOS Snapshot
 
 echo "Uploading decompressed RHCOS disk image to SBE S3"
-${S3} cp "${RHCOS_IMG}" "s3://${S3_BUCKET}/"
+${S3_OBJECT} cp "${RHCOS_IMG}" "s3://${S3_BUCKET}/"
 
 rm -f /tmp/containers.json
  
@@ -91,7 +100,7 @@ RHCOS_AMI=$(${EC2} register-image \
   --root-device-name /dev/sda1)
 
 # Update the env script to have the new AMI ID
-sed -i "s|SBE-AMI|${RHCOS_AMI}|" env.sh
+sed -i "s|RHCOS_BASE_AMI_ID=.*|RHCOS_BASE_AMI_ID=${RHCOS_AMI}|" env.sh
 
 echo "RHCOS AMI: ${RHCOS_AMI}"
 
