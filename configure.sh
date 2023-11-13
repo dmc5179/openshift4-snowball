@@ -28,23 +28,4 @@ sed -i "s|export CLUSTER_NAME=.*|export CLUSTER_NAME=\"${cluster_name}\"|" "${SC
 
 sed -i "s|export SSH_KEY=.*|export SSH_KEY=\"${ssh_key}\"|" "${SCRIPT_DIR}/env.sh"
 
-# These we have to discover dynamically so source the env file and query
-source "${SCRIPT_DIR}/env.sh"
-
-ec2_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id ec2 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
-s3_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id s3 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
-
-sed -i "s|export EC2_PORT=.*|export EC2_PORT=\"$ec2_port\"|" "${SCRIPT_DIR}/env.sh"
-
-sed -i "s|export S3_PORT=.*|export S3_PORT=\"$s3_port\"|" "${SCRIPT_DIR}/env.sh"
-
-# TODO: Update Ansible var files
-
-# - Configure ansible playbook default values with values passed in to this script
-#cp /home/ec2-user/openshift4-snowball/playbooks/group_vars/all/aws.yml.example \
-#    /home/ec2-user/openshift4-snowball/playbooks/group_vars/all/aws.yml
-
-#cp /home/ec2-user/openshift4-snowball/playbooks/group_vars/all/all.yml.example \
-#    /home/ec2-user/openshift4-snowball/playbooks/group_vars/all/all.yml
-
 exit 0
