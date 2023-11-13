@@ -39,7 +39,7 @@ CERT_ARN=$(snowballEdge list-certificates ${SBE_OPTS} | jq -r '.Certificates[0].
 snowballEdge get-certificate ${SBE_OPTS} --certificate-arn ${CERT_ARN} > snow_cert.pem
 
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
-if [[ "${DISTRO}" =~ 'Fedora' || "${DISTRO}" =~ 'RHEL' || "${DISTRO}" =~ 'CentOS' ]]
+if [[ "${DISTRO}" =~ 'Fedora' || "${DISTRO}" =~ 'RHEL' || "${DISTRO}" =~ 'CentOS' || "${DISTRO}" =~ 'Red Hat' ]]
 then
   ca_bundle="/etc/pki/ca-trust/source/anchors/snow_cert.pem"
   # Add snowcone certificate to the system trust store and update
