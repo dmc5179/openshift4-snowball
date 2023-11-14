@@ -37,6 +37,6 @@ ec2_sg:
 
 #########################################################################
 # Variable related to staging ignition files in S3
-s3_bucket: '2443-snow-3'
+s3_bucket: ''
 s3_path: 'ignition'
 
