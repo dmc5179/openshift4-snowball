@@ -49,10 +49,10 @@ frontend openshift-api-server
 backend openshift-api-server
     balance source
     mode tcp
-    server bootstrap 192.168.1.247:6443 check
-    server controlplane0 192.168.1.82:6443 check
-    server controlplane1 192.168.1.87:6443 check
-    server controlplane2 192.168.1.107:6443 check
+    server bootstrap {{ bootstrap_ip }}:6443 check
+    server controlplane0 {{ master0_ip }}:6443 check
+    server controlplane1 {{ master1_ip }}:6443 check
+    server controlplane2 {{ master2_ip }}:6443 check
 
 frontend machine-config-server
     bind *:22623
@@ -63,10 +63,10 @@ frontend machine-config-server
 backend machine-config-server
     balance source
     mode tcp
-    server bootstrap 192.168.1.247:22623 check
-    server controlplane0 192.168.1.82:22623 check
-    server controlplane1 192.168.1.87:22623 check
-    server controlplane2 192.168.1.107:22623 check
+    server bootstrap {{ bootstrap_ip }}:22623 check
+    server controlplane0 {{ master0_ip }}:22623 check
+    server controlplane1 {{ master1_ip }}:22623 check
+    server controlplane2 {{ master2_ip }}:22623 check
 
 frontend ingress-http
     bind *:80
@@ -77,9 +77,9 @@ frontend ingress-http
 backend ingress-http
     balance source
     mode tcp
-    server controlplane0 192.168.1.82:80 check
-    server controlplane1 192.168.1.87:80 check
-    server controlplane2 192.168.1.107:80 check
+    server controlplane0 {{ master0_ip }}:80 check
+    server controlplane1 {{ master1_ip }}:80 check
+    server controlplane2 {{ master2_ip }}:80 check
 
 frontend ingress-https
     bind *:443
@@ -90,8 +90,8 @@ frontend ingress-https
 backend ingress-https
     balance source
     mode tcp
-    server controlplane0 192.168.1.82:443 check
-    server controlplane1 192.168.1.87:443 check
-    server controlplane2 192.168.1.107:443 check
+    server controlplane0 {{ master0_ip }}:443 check
+    server controlplane1 {{ master1_ip }}:443 check
+    server controlplane2 {{ master2_ip }}:443 check
 
 #---------------------------------------------------------------------
