@@ -1,0 +1,10 @@
+[all]
+localhost
+
+[all:vars]
+
+ansible_connection=local
+ansible_user=ec2-user
+ansible_become_method=sudo
+ansible_become_user=root
+ansible_python_interpreter=/usr/bin/python3.9

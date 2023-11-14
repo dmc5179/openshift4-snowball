@@ -14,16 +14,19 @@ MASTER_UD="/var/www/html/ignition/merge_master.ign"
 
 MY_IP=$(hostname -i)
 
+# Variables to pass when calling ansible-playbook
+ANSIBLE_VARS="ssh_key_file=${SSH_KEY} ocp_base_domain=${BASE_DOMAIN} ocp_cluster_name=${CLUSTER_NAME} rhcos_ami=${RHCOS_BASE_AMI_ID}"
+
 # Generate Ignition Configs
 echo "Generating Ignition Configuration"
 pushd "${SCRIPT_DIR}/playbooks"
-ansible-playbook -e ansible_python_interpreter=/usr/bin/python3.9 generate_ignition.yaml
+ansible-playbook -e "${ANSIBLE_VARS}" generate_ignition.yaml
 popd
 
 # Stage Ignition Configs in S3
 echo "Staging Ignition Configs in local httpd server"
 pushd "${SCRIPT_DIR}/playbooks"
-ansible-playbook -e ansible_python_interpreter=/usr/bin/python3.9 stage_ignition.yaml
+ansible-playbook -e "${ANSIBLE_VARS}" stage_ignition.yaml
 popd
 
 #exit 0
