@@ -29,7 +29,10 @@ fips: {{ fips_enabled | bool | lower }}
 publish: "{{ ocp_cluster_publish }}"
 additionalTrustBundle: |
 {{ slurped_aws_api_ca_bundle_64.content | b64decode | trim }}
+{% if disconnected | bool %}
 {{ slurped_registry_ca_bundle_b64.content | b64decode | trim }}
+{% endif %}
+{% if disconnected | bool %}
 imageContentSources:
 - mirrors:
   - {{ mirror_registry }}:{{ mirror_registry_port }}/openshift/release-images
@@ -37,3 +40,4 @@ imageContentSources:
 - mirrors:
   - {{ mirror_registry }}:{{ mirror_registry_port }}/openshift/release
   source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+{% endif %}

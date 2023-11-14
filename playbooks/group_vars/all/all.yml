@@ -40,6 +40,8 @@ single_node: false
 master_count: 3
 worker_count: 0
 
+disconnected: true
+
 mirror_registry: '{{ ansible_env.HOSTNAME }}'
 
 mirror_registry_port: 8443
