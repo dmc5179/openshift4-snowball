@@ -12,6 +12,9 @@ source "${SCRIPT_DIR}/env.sh"
 BOOTSTRAP_UD="/var/www/html/ignition/merge_bootstrap.ign"
 MASTER_UD="/var/www/html/ignition/merge_master.ign"
 
+BOOTSTRAP_INSTANCE_TYPE="sbe-c.2xlarge"
+MASTER_INSTANCE_TYPE="sbe-c.2xlarge"
+
 MY_IP=$(hostname -i)
 
 # Variables to pass when calling ansible-playbook
@@ -40,7 +43,7 @@ touch /tmp/ocp_instances.txt
 BOOTSTRAP_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --user-data "file://${BOOTSTRAP_UD}" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Bootstrap}]' \
-  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
+  --instance-type ${BOOTSTRAP_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Bootstrap Instance ID: ${BOOTSTRAP_INST_ID}"
 echo "${BOOTSTRAP_INST_ID}" >> /tmp/ocp_instances.txt
@@ -69,7 +72,7 @@ echo "Bootstrap private ip: ${BOOTSTRAP_PRIVATE_IP}"
 MASTER0_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --user-data "file://${MASTER_UD}" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master0}]' \
-  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
+  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Master 0 Instance ID: ${MASTER0_INST_ID}"
 echo "${MASTER0_INST_ID}" >> /tmp/ocp_instances.txt
@@ -95,7 +98,7 @@ echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
 MASTER1_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --user-data "file://${MASTER_UD}" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master1}]' \
-  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
+  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Master 1 Instance ID: ${MASTER1_INST_ID}"
 echo "${MASTER1_INST_ID}" >> /tmp/ocp_instances.txt
@@ -120,7 +123,7 @@ echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
 MASTER2_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --user-data "file://${MASTER_UD}" \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master2}]' \
-  --instance-type sbe-c.xlarge | jq -r '.Instances[0].InstanceId')
+  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Master 2 Instance ID: ${MASTER2_INST_ID}"
 echo "${MASTER2_INST_ID}" >> /tmp/ocp_instances.txt
