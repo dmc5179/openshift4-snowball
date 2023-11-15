@@ -79,20 +79,20 @@ sed -i "s|export S3_OBJECT_ENDPOINT=.*|export S3_OBJECT_ENDPOINT=\"$s3_object_en
 #######################################################################################################
 # Configure the EC2 and S3 port numbers
 ec2_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id ec2 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
-sts_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id sts | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
-iam_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id iam | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
-ssm_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id ssm | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+#sts_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id sts | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+#iam_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id iam | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+#ssm_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id ssm | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
 s3_bucket_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id s3-snow | jq -r -c '.Endpoints[] | select(.Description=="s3-snow bucket API endpoint").Port')
 s3_object_port=$(snowballEdge describe-service ${SBE_OPTS} --service-id s3-snow | jq -r -c '.Endpoints[] | select(.Description=="s3-snow object API endpoint").Port')
 
 # Replace vars in the env.sh file
 sed -i "s|export EC2_PORT=.*|export EC2_PORT=\"$ec2_port\"|" "${SCRIPT_DIR}/env.sh"
 
-sed -i "s|export STS_PORT=.*|export STS_PORT=\"$sts_port\"|" "${SCRIPT_DIR}/env.sh"
+#sed -i "s|export STS_PORT=.*|export STS_PORT=\"$sts_port\"|" "${SCRIPT_DIR}/env.sh"
 
-sed -i "s|export IAM_PORT=.*|export IAM_PORT=\"$iam_port\"|" "${SCRIPT_DIR}/env.sh"
+#sed -i "s|export IAM_PORT=.*|export IAM_PORT=\"$iam_port\"|" "${SCRIPT_DIR}/env.sh"
 
-sed -i "s|export SSM_PORT=.*|export SSM_PORT=\"$ssm_port\"|" "${SCRIPT_DIR}/env.sh"
+#sed -i "s|export SSM_PORT=.*|export SSM_PORT=\"$ssm_port\"|" "${SCRIPT_DIR}/env.sh"
 
 sed -i "s|export S3_BUCKET_PORT=.*|export S3_BUCKET_PORT=\"$s3_bucket_port\"|" "${SCRIPT_DIR}/env.sh"
 sed -i "s|export S3_OBJECT_PORT=.*|export S3_OBJECT_PORT=\"$s3_object_port\"|" "${SCRIPT_DIR}/env.sh"
