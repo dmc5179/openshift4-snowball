@@ -1,6 +1,6 @@
 # openshift4-snowball
 
-Tool to deploy OpenShift 4 on an AWS Snowball Edge Device
+Tools to deploy OpenShift 4 on an AWS Snowball Edge Device
 
 # Table of Contents
 
@@ -56,8 +56,6 @@ snowballEdge start-service --endpoint https://<ENDPOINT> --manifest-file <MANIFE
 
 ## Extract AWS API Keys
 
-The AWS API keys should be saved under the snowballEdge profile.
-
 - List the API keys included with the SBE
 ```
 snowballEdge  list-access-keys --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE>
@@ -66,6 +64,11 @@ snowballEdge  list-access-keys --endpoint https://<ENDPOINT> --manifest-file <MA
 - Get secret key associated with access key above
 ```
 snowballEdge get-secret-access-key --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --access-key-id "access_key from above command"
+```
+
+- Configure the snowballEdge AWS CLI profile. Enter the access keys from the above command, region as snow, output as json.
+```
+aws --profile snowballEdge configure
 ```
 
 ## Create EC2 Keypair
@@ -148,3 +151,9 @@ import_rhcos_ami.sh
 ./deploy_openshift.sh
 ```
 
+- To check that the cluster is online, use the following command
+```
+oc get co
+```
+
+- Once the cluster is online the bootstrap node will need to be manually terminated
