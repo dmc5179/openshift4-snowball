@@ -140,6 +140,8 @@ import_rhcos_ami.sh
 ## Deploy Required services on the Content Instance
 
 - Run the following script to setup the environment on the content instance. This will setup the httpd, bind, and haproxy services.
+- Note that the DNS prompt refers to seting up DNS on the SBE or using an SBE external DNS
+  Yes== setup DNS on the SBE, No == Use an SBE external DNS
 ```
 ./setup.sh
 ```
