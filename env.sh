@@ -64,10 +64,5 @@ alias s3_bucket="aws --profile snowballEdge --region snow  --endpoint https://${
 export S3_OBJECT="aws --profile snowballEdge --region snow  --endpoint https://${S3_OBJECT_ENDPOINT}:${S3_OBJECT_PORT} --ca-bundle ${CA_BUNDLE} s3"
 alias s3_object="aws --profile snowballEdge --region snow  --endpoint https://${S3_OBJECt_ENDPOINT}:${S3_OBJECT_PORT} --ca-bundle ${CA_BUNDLE} s3"
 
-############################################################
-#TODO May not actually need these anymore
 export RHCOS_VER='4.13.10'
 export OCP_VER='4.13.10'
-export PLATFORM='metal'
-export RHCOS_BASE_URL="https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos"
-#############################################################
