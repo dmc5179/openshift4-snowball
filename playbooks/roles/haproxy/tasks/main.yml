@@ -71,9 +71,9 @@
     ('firewalld.service' in services) and
     (ansible_facts.services["firewalld.service"].state is match("running"))
 
-#- name: Ensure HAProxy is started and enabled on boot.
-#  become: true
-#  service:
-#    name: haproxy
-#    state: started
-#    enabled: true
+- name: Ensure HAProxy is started and enabled on boot.
+  become: true
+  service:
+    name: haproxy
+    state: started
+    enabled: true
