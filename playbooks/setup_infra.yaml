@@ -1,0 +1,39 @@
+---
+
+# Script to deploy httpd, bind, and haproxy
+# Run this script after running the configure.sh script
+
+- hosts: localhost
+  gather_facts: true
+  become: false
+  vars_prompt:
+
+    - name: dns
+      prompt: Deploy local DNS? (y/n)
+      private: false
+
+  tasks:
+
+    - name: Deploy local DNS if selected
+      ansible.builtin.include_role:
+        name: install_bind
+      vars:
+        dns_zone_one: "{{ base_domain }}"
+        bastion_ip: $(hostname -i)
+        dns_network: ${subnet}
+        bind_forwarder1: "34.223.14.129"
+        bind_forwarder2: "8.8.8.8"
+      when: dns == "y" or dns == "Y" or dns == "yes"
+
+    - name: Deploy httpd server
+      ansible.builtin.include_role:
+        name: install_httpd
+
+    - name: Deploy HAProxy Load Balancer
+      ansible.builtin.include_role:
+      name: haproxy
+      vars:
+        bootstrap_ip: {{ bootstrap_ip }}
+        master0_ip: {{ master0_ip }}
+        master1_ip: {{ master1_ip }}
+        master2_ip: {{ master2_ip }}

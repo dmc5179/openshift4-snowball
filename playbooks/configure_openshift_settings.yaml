@@ -1,0 +1,88 @@
+---
+- hosts: localhost
+  gather_facts: true
+  become: false
+  vars_prompt:
+
+    - name: s3_bucket
+      prompt: Enter S3 bucket to use on SnowBall
+      private: false
+
+    - name: base_domain
+      prompt: Enter OpenShift base domain name (i.e. mycluster.io)
+      private: false
+
+    - name: cluster_name
+      prompt: Enter OpenShift cluster name (i.e ocp4)
+      private: false
+
+    - name: ssh_key
+      prompt: Enter path to SSH private key PEM file
+      private: false
+
+    - name: bootstrap_ip
+      prompt: Enter bootstrap IP Address
+      private: false
+
+    - name: master0_ip
+      prompt: Enter Master 0 IP Address
+      private: false
+
+    - name: master1_ip
+      prompt: Enter Master 1 IP Address
+      private: false
+
+    - name: master2_ip
+      prompt: Enter Master 2 IP Address
+      private: false
+
+  tasks:
+
+    - name: Replace EC2 port variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 's3_bucket:.*'
+        replace: 's3_bucket: {{ s3_bucket }}'
+
+    - name: Replace base domain variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'base_domain:.*'
+        replace: 'base_domain: {{ base_domain }}'
+
+    - name: Replace cluster name variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'cluster_name:.*'
+        replace: 'cluster_name: {{ cluster_name }}'
+
+    - name: Replace ssh key variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'ssh_key:.*'
+        replace: 'ssh_key: {{ ssh_key }}'
+
+    - name: Replace bootstrap IP variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'bootstrap_ip:.*'
+        replace: 'bootstrap_ip: {{ bootstrap_ip }}'
+
+    - name: Replace master 0 IP variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'master0_ip:.*'
+        replace: 'master0_ip: {{ master0_ip }}'
+
+    - name: Replace master 1 IP variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'master1_ip:.*'
+        replace: 'master1_ip: {{ master1_ip }}'
+
+    - name: Replace master 2 IP variable
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/group_vars/all/aws.yml"
+        regexp: 'master2_ip:.*'
+        replace: 'master2_ip: {{ master2_ip }}'
+

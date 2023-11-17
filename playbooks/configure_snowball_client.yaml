@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  gather_facts: true
+  become: false
+  tasks:
+
+    - name: Configure Snowball Client
+      import_role:
+        name: configure_snowball_client
