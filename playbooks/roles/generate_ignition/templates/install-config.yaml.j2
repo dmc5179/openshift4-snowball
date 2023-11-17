@@ -18,7 +18,7 @@ networking:
   clusterNetwork:
   - cidr: "{{ cluster_network_cidr }}"
     hostPrefix: {{ cluster_network_prefix }}
-  networkType: "{{ ocp_sdn }}"
+  networkType: OVNKubernetes
   serviceNetwork:
   - "{{ service_network_cidr }}"
 platform:
