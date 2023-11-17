@@ -1,0 +1,33 @@
+function snowballEdge()
+{
+  /usr/local/bin/snowball-client-linux-1.2.0-870/bin/snowballEdge $@ --endpoint https://{{ sbe_endpoint }} --manifest-file {{ manifest }} --unlock-code {{ unlock }}
+}
+
+function aws()
+{
+
+  case $1 in
+
+    ec2)
+      ${HOME}/.local/bin/aws --profile snowballEdge --region snow --endpoint https://{{ non_s3_endpoint}:{{ ec2_port }} --ca-bundle {{ aws_certificate_bundle }} $@
+      ;;
+
+    iam)
+      ${HOME}/.local/bin/aws --profile snowballEdge --region snow --endpoint https://{{ non_S3_endpoint}:{{ iam_port }} --ca-bundle {{ aws_certificate_bundle }} $@
+      ;;
+
+    ssm)
+      ${HOME}/.local/bin/aws --profile snowballEdge --region snow --endpoint https://{{ non_S3_endpoint}:{{ ssm_port }} --ca-bundle {{ aws_certificate_bundle }} $@
+      ;;
+
+    sts)
+      ${HOME}/.local/bin/aws --profile snowballEdge --region snow --endpoint https://{{ non_s3_endpoint }}:{{ sts_port }} --ca-bundle {{ aws_certificate_bundle }} $@
+      ;;
+
+    s3)
+      echo "S3 not supported by this alias function yet."
+      ;;
+
+  esac
+
+}

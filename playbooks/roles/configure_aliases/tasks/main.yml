@@ -1,0 +1,10 @@
+---
+
+- name: Install aws alias functions
+  become: true
+  ansible.builtin.template:
+    src: snowball_aliases.sh.j2
+    dest: /etc/profile.d/snowball_aliases.sh
+    owner: root
+    group: root
+    mode: 0644
