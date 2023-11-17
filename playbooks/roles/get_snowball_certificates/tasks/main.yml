@@ -1,0 +1,37 @@
+---
+
+- name: get certificate ARN
+  ansible.builtin.shell: snowballEdge list-certificates {{ sbe_opts }}
+  delegate_to: localhost
+  register: certificate_arn_info
+
+- debug:
+    var: certificate_arn_info
+
+- set_fact:
+    certificate_arn: "{{ certificate_arn_info.stdout | from_json | community.general.json_query('Certificates[0].CertificateArn') }}"
+
+- name: Export snowball certificate
+  delegate_to: localhost
+  ansible.builtin.command: snowballEdge get-certificate {{ sbe_opts }} --certificate-arn {{ certificate_arn }}
+  register: certificate_info
+
+- name: Write certificate to disk
+  become: true
+  delegate_to: localhost
+  ansible.builtin.copy:
+    content: "{{ certificate_info.stdout }}"
+    dest: "{{ aws_certificate_bundle }}"
+    owner: root
+    group: root
+    mode: 0444
+
+- name: Update CA Trust Store
+  become: true
+  delegate_to: localhost
+  ansible.builtin.command: update-ca-trust
+
+- name: Extract CA Trust Store
+  become: true
+  delegate_to: localhost
+  ansible.builtin.command: update-ca-trust extract
