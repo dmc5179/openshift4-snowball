@@ -3,7 +3,7 @@
 # Not in Combine
 - name: Get AMI ID if not set
   shell: |
-    {{ openshift_install }} coreos print-stream-json | jq -r '.architectures.x86_64.images.aws[]."{{ ansible_env.AWS_DEFAULT_REGION }}".image'
+    openshift-install coreos print-stream-json | jq -r '.architectures.x86_64.images.aws[]."{{ ansible_env.AWS_DEFAULT_REGION }}".image'
   register: rhcos_image_info
   when:
     - ( rhcos_ami is not defined ) and (not combine | bool)
@@ -11,7 +11,7 @@
 # In Combine
 - name: Get AMI ID if not set
   shell: |
-    {{ openshift_install }} coreos print-stream-json | jq -r '.architectures.x86_64.images.aws[]."us-east-1".image'
+    openshift-install coreos print-stream-json | jq -r '.architectures.x86_64.images.aws[]."us-east-1".image'
   register: rhcos_image_info
   when:
     - ( rhcos_ami is not defined ) and (combine | bool)
