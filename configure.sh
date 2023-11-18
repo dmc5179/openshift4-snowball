@@ -15,7 +15,7 @@ read -p "Enter Master 1 IP Address: " master1_ip
 read -p "Enter Master 2 IP Address: " master2_ip
 
 # - Configure the env.sh file with values passed in to this script
-sed -i "s|export S3_BUCKET=.*||" "${SCRIPT_DIR}/env.sh"
+sed -i "s|export S3_BUCKET=.*|export S3_BUCKET=\"${s3_bucket}\"|" "${SCRIPT_DIR}/env.sh"
 
 sed -i "s|export BOOTSTRAP_IP=.*|export BOOTSTRAP_IP=\"$bootstrap_ip\"|" "${SCRIPT_DIR}/env.sh"
 sed -i "s|export MASTER0_IP=.*|export MASTER0_IP=\"$master0_ip\"|" "${SCRIPT_DIR}/env.sh"
