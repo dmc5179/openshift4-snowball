@@ -120,6 +120,23 @@ cd /home/ec2-user/openshift4-snowball
 ./configure_snowball_client.sh
 ```
 
+## Extract AWS API Keys
+
+- List the API keys included with the SBE
+```
+snowballEdge  list-access-keys --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE>
+```
+
+- Get secret key associated with access key above
+```
+snowballEdge get-secret-access-key --endpoint https://<ENDPOINT> --manifest-file <MANIFEST> --unlock-code <UNLOCK CODE> --access-key-id "access_key from above command"
+```
+
+- Configure the snowballEdge AWS CLI profile. Enter the access keys from the above command, region as snow, output as json.
+```
+aws --profile snowballEdge configure
+```
+
 ## Configure Environemt on the Content Instance
 
 - Run the following script to configure the environment on the content instance
