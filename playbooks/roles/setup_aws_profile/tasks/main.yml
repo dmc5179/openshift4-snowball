@@ -1,0 +1,28 @@
+---
+
+- name: List the API keys included with the SBE
+  ansible.builtin.shell: "{{ snowball_client }} list-access-keys {{ sbe_opts }}"
+  register: access_keys_info
+
+- name: Set access key var
+  ansible.builtin.set_fact:
+    aws_access_key: "{{ access_keys_info.stdout | from_json | community.general.json_query('AccessKeyIds') | replace('[','') | replace(']','') | replace(\"'\",'')}}"
+
+- name: Get secret key associated with access key above
+  ansible.builtin.shell: "{{ snowball_client }} get-secret-access-key {{ sbe_opts }} --access-key-id {{ aws_access_key }}"
+  register: secret_access_key_info
+
+- name: Create aws config directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.aws"
+    state: directory
+
+- name: Add aws config file
+  ansible.builtin.template:
+    src: config.j2
+    dest: "{{ ansible_env.HOME }}/.aws/config"
+
+- name: Add aws credentials file
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.aws/credentials"
+    content: "{{ secret_access_key_info.stdout }}"
