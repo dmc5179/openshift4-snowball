@@ -60,6 +60,9 @@ sudo losetup -D
 echo "Uploading decompressed RHCOS disk image to SBE S3"
 ${S3_OBJECT} cp "${RHCOS_IMG}" "s3://${S3_BUCKET}/"
 
+# Remove the local RHCOS disk image file after s3 upload
+rm -f "${RHCOS_IMG}"
+
 rm -f /tmp/containers.json
  
 cat << EOF > /tmp/containers.json
