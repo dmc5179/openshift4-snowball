@@ -4,23 +4,22 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 source "${SCRIPT_DIR}/env.sh"
 
-# Get the RHCOS image name
-RHCOS_VMDK=$(ls -1 /opt/openshift/rhcos/rhcos*.vmdk.gz)
+# Get the RHCOS VMDK compressed image name
+RHCOS_VMDK_GZ=$(ls -1 /opt/openshift/rhcos/rhcos*.vmdk.gz)
+# Get the RHCOS VMDK image name
+RHCOS_VMDK="${RHCOS_VMDK_GZ%.*}"
 
-extension=${RHCOS_VMDK##*.}
-
-# If the file is compressed, decompress it and change file var
-if [[ "${extension}" == "gz" ]]
-then
-  gunzip "${RHCOS_VMDK}"
-  RHCOS_VMDK="${RHCOS_VMDK%.*}"
-fi
+# Decompress without losing the original file in case this script needs to be rerun
+gunzip -c "${RHCOS_VMDK_GZ}" > "${RHCOS_VMDK}"
 
 RHCOS_IMG="${RHCOS_VMDK%.*}.img"
 
 # Convert RHCOS VMDK into RAW disk
 # SBE only allows import of RAW disks
 qemu-img convert -f vmdk -O raw ${RHCOS_VMDK} ${RHCOS_IMG}
+
+# Remove VMDK file
+rm -f "${RHCOS_VMDK}"
 
 # Increase size of disk to 75 GBs
 qemu-img resize -f raw "${RHCOS_IMG}" +50G
