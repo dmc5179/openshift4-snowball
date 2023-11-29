@@ -22,7 +22,7 @@ then
   pushd "${SCRIPT_DIR}/playbooks"
   subnet=$(hostname -I | awk -F\. '{print $1"."$2"."$3}')
   ansible-playbook \
-    --extra-vars "ansible_python_interpreter=/usr/bin/python3.9 dns_zone_one=${BASE_DOMAIN} bastion_ip=$(hostname -i) dns_network=${subnet} bind_forwarder1=34.223.14.129 bind_forwarder2=8.8.8.8" \
+    --extra-vars "ansible_python_interpreter=/usr/bin/python3.9 dns_zone_one=${BASE_DOMAIN} bastion_ip=$(hostname -I) dns_network=${subnet} bind_forwarder1=34.223.14.129 bind_forwarder2=8.8.8.8" \
     dns_server.yaml
   popd
 else
