@@ -79,12 +79,12 @@ bind_zone_domains:
       - 'bastion'
     hosts:
       - name: "bastion"
-        ip: "34.223.14.195"
+        ip: "{{ bastion_ip }}"
       - name: "api.ocp4"
-        ip: "34.223.14.195"
+        ip: "{{ bastion_ip }}"
       - name: "api-int.ocp4"
-        ip: "34.223.14.195"
+        ip: "{{ bastion_ip }}"
       - name: "*.apps.ocp4"
-        ip: "34.223.14.195"
+        ip: "{{ bastion_ip }}"
     networks:
-      - '34.223.14'
+      - "{{ dns_network }}"
