@@ -9,6 +9,8 @@ source "${SCRIPT_DIR}/env.sh"
 
 read -p "Deploy local DNS? (y/n): " dns
 
+MY_IP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+
 # Deploy httpd server
 echo "Deploying httpd server"
 pushd "${SCRIPT_DIR}/playbooks"
@@ -20,9 +22,9 @@ if [[ $dns == "y" || $dns == "Y" || $dns == "yes" ]]
 then
   echo "Deploying DNS server"
   pushd "${SCRIPT_DIR}/playbooks"
-  subnet=$(hostname -I | awk -F\. '{print $1"."$2"."$3}')
+  subnet=$(echo "${MY_IP} | awk -F\. '{print $1"."$2"."$3}')
   ansible-playbook \
-    --extra-vars "ansible_python_interpreter=/usr/bin/python3.9 dns_zone_one=${BASE_DOMAIN} bastion_ip=$(hostname -I) dns_network=${subnet} bind_forwarder1=34.223.14.129 bind_forwarder2=8.8.8.8" \
+    --extra-vars "ansible_python_interpreter=/usr/bin/python3.9 dns_zone_one=${BASE_DOMAIN} bastion_ip=${MY_IP} dns_network=${subnet} bind_forwarder1=34.223.14.129 bind_forwarder2=8.8.8.8" \
     dns_server.yaml
   popd
 else

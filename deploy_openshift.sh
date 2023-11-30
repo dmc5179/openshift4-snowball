@@ -15,7 +15,7 @@ MASTER_UD="/var/www/html/ignition/merge_master.ign"
 BOOTSTRAP_INSTANCE_TYPE="sbe-c.2xlarge"
 MASTER_INSTANCE_TYPE="sbe-c.2xlarge"
 
-MY_IP=$(hostname -i)
+MY_IP=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
 
 # Variables to pass when calling ansible-playbook
 ANSIBLE_VARS="ssh_key_file=${SSH_KEY} ocp_base_domain=${BASE_DOMAIN} ocp_cluster_name=${CLUSTER_NAME} rhcos_ami=${RHCOS_BASE_AMI_ID} disconnected=false"
