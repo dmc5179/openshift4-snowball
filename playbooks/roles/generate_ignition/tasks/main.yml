@@ -439,6 +439,18 @@
   when:
     - (local_dns | bool)
 
+- name: Cleanup fakeroots directory from filetranspile
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/fakeroots/etc/NetworkManager/system-connections"
+    - "/tmp/fakeroots/etc/NetworkManager"
+    - "/tmp/fakeroots/etc"
+    - "/tmp/fakeroots"
+  when:
+    - (local_dns | bool)
+
 - name: Create kube config location
   file:
     path: "{{ kubeconfig | dirname }}"
