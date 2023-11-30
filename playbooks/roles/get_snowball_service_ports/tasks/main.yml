@@ -1,0 +1,101 @@
+---
+
+- name: Get non s3 endpoint IP
+  ansible.builtin.command: snowballEdge describe-service {{ sbe_opts }} --service-id ec2
+  register: non_s3_endpoint_info
+
+- name: Set non s3 endpoint IP
+  set_fact:
+    non_s3_endpoint: "{{ non_s3_endpoint_info.stdout | from_json | community.general.json_query('Protocol==\"https\").Host') }}"
+
+##########################
+
+- name: Get S3 Bucket Endpoint
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow
+  register: s3_bucket_endpoint_info
+
+- name: Set S3 Bucket Endpoint
+  set_fact:
+    s3_bucket_endpoint: "{{ s3_bucket_endpoint_info | from_json | community.general.json_query('.Endpoints[] | select(.Description==\"s3-snow bucket API endpoint\").Host')"
+
+####################################################
+
+- name: Get S3 Object Endpoint
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow
+  register: s3_object_endpoint_info
+
+- name: Set S3 Object Endpoint var
+  set_fact:
+    s3_object_endpoint: "{{ }} | from_json | community.general.json_query('')"
+
+s3_object_endpoint=$(snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow | jq -r -c '.Endpoints[] | select(.Description=="s3-snow object API endpoint").Host')
+
+- name: Get EC2 Port
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id ec2
+  register: ec2_port_info
+
+- name: Set EC2 Port var
+  set_fact:
+    ec2_port: "{{ }} | from_json | community.general.json_query('')"
+
+ec2_port=$(snowballEdge describe-service {{ sbe_opts }} --service-id ec2 | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+
+- name: Get STS Port
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id sts
+  register: sts_port_info
+  when:
+    - (sts_enabled | bool)
+
+- name: Set STS Port var
+  set_fact:
+    sts_port: "{{ }} | from_json | community.general.json_query('')"
+  when:
+    - (sts_enabled | bool)
+
+sts_port=$(snowballEdge describe-service {{ sbe_opts }} --service-id sts | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+
+- name: Get IAM port
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id iam
+  register: iam_port_info
+  when:
+    - (iam_enabled | bool)
+
+- name: Set IAM port var
+  set_fact:
+    iam_port: "{{ }} | from_json | community.general.json_query('')"
+  when:
+    - (iam_enabled | bool)
+
+iam_port=$(snowballEdge describe-service {{ sbe_opts }} --service-id iam | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+
+- name: Get SSM Port
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id ssm
+  register:
+  when:
+    - (ssm_enabled | bool)
+
+- name: Set SSM Port var
+  set_fact: "{{ }} | from_json | community.general.json_query('')"
+  when:
+    - (ssm_enabled | bool)
+
+ssm_port=$(snowballEdge describe-service {{ sbe_opts }} --service-id ssm | jq -c -r '.Endpoints[] | select(.Protocol=="https").Port')
+
+- name: Get S3 Bucket Port
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow
+  register:
+
+- name: Set S3 Bucket Port var
+  set_fact: "{{ }} | from_json | community.general.json_query('')"
+
+s3_bucket_port=$(snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow | jq -r -c '.Endpoints[] | select(.Description=="s3-snow bucket API endpoint").Port')
+
+- name: Get S3 Object Port
+  ansible.builin.command: snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow
+  register:
+
+- name: Set S3 Object Port var
+  set_fact: "{{ }} | from_json | community.general.json_query('')"
+
+s3_object_port=$(snowballEdge describe-service {{ sbe_opts }} --service-id s3-snow | jq -r -c '.Endpoints[] | select(.Description=="s3-snow object API endpoint").Port')
+
