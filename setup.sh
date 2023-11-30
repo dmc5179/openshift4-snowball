@@ -22,7 +22,7 @@ if [[ $dns == "y" || $dns == "Y" || $dns == "yes" ]]
 then
   echo "Deploying DNS server"
   pushd "${SCRIPT_DIR}/playbooks"
-  subnet=$(echo "${MY_IP} | awk -F\. '{print $1"."$2"."$3}')
+  subnet=$(echo "${MY_IP}" | awk -F\. '{print $1"."$2"."$3}')
   ansible-playbook \
     --extra-vars "ansible_python_interpreter=/usr/bin/python3.9 dns_zone_one=${BASE_DOMAIN} bastion_ip=${MY_IP} dns_network=${subnet} bind_forwarder1=34.223.14.129 bind_forwarder2=8.8.8.8" \
     dns_server.yaml
