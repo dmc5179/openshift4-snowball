@@ -368,6 +368,77 @@
 - name: Create ignition configs
   shell: "openshift-install create ignition-configs --dir={{ ignition_configs }}"
 
+- name: Create fakeroots directory for filetranspile
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "/tmp/fakeroots"
+    - "/tmp/fakeroots/etc"
+    - "/tmp/fakeroots/etc/NetworkManager"
+    - "/tmp/fakeroots/etc/NetworkManager/system-connections"
+  when:
+    - (local_dns | bool)
+
+- name: Create eth0 nmconnection file
+  ansible.builtin.template:
+    src: eth0.nmconnection.j2
+    dest: "/tmp/fakeroots/etc/NetworkManager/system-connections/eth0.nmconnection"
+    mode: 0600
+  when:
+    - (local_dns | bool)
+
+- name: Create ens3 nmconnection file
+  ansible.builtin.template:
+    src: ens3.nmconnection.j2
+    dest: "/tmp/fakeroots/etc/NetworkManager/system-connections/ens3.nmconnection"
+    mode: 0600
+  when:
+    - (local_dns | bool)
+
+- name: Inject nmconnection files into bootstrap.ign with filetranspile
+  ansible.builtin.shell: "filetranspile -i {{ ignition_configs }}/bootstrap.ign -f /tmp/fakeroots"
+  register: bootstrap_filetranspile_info
+  when:
+    - (local_dns | bool)
+
+- name: Replace bootstrap.ign with filetranspiled bootstrap.ign
+  ansible.builtin.copy:
+    content: "{{ bootstrap_filetranspile_info.stdout }}"
+    dest: '{{ ignition_configs }}/bootstrap.ign'
+    force: true
+  when:
+    - (local_dns | bool)
+
+- name: Inject nmconnection files into master.ign with filetranspile
+  ansible.builtin.shell: "filetranspile -i {{ ignition_configs }}/master.ign -f /tmp/fakeroots"
+  register: master_filetranspile_info
+  when:
+    - (local_dns | bool)
+
+- name: Replace master.ign with filetranspiled master.ign
+  ansible.builtin.copy:
+    content: "{{ master_filetranspile_info.stdout }}"
+    dest: '{{ ignition_configs }}/master.ign'
+    force: true
+  when:
+    - (local_dns | bool)
+
+- name: Inject nmconnection files into worker.ign with filetranspile
+  ansible.builtin.shell: "filetranspile -i {{ ignition_configs }}/worker.ign -f /tmp/fakeroots"
+  register: worker_filetranspile_info
+  when:
+    - (local_dns | bool)
+
+- name: Replace worker.ign with filetranspiled worker.ign
+  ansible.builtin.copy:
+    content: "{{ worker_filetranspile_info.stdout }}"
+    dest: '{{ ignition_configs }}/worker.ign'
+    force: true
+  when:
+    - (local_dns | bool)
+
 - name: Create kube config location
   file:
     path: "{{ kubeconfig | dirname }}"
