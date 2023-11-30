@@ -50,7 +50,7 @@ mirror_transport: 'https'
 
 fips_enabled: false
 
-certificate_bundle: '/etc/pki/ca-trust/source/anchors/quay.cert'
+certificate_bundle: '/etc/pki/ca-trust/source/anchors/quay.pem'
 # Certificate bundle for the AWS API
 aws_certificate_bundle: '/etc/pki/ca-trust/source/anchors/snow_cert.pem'
 
