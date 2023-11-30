@@ -6,6 +6,10 @@
   become: false
   tasks:
 
-    - name: Deploy local storage operator
+    - name: Get snowball service endpoints
       import_role:
-        name: local_storage
+        name: get_snowball_service_ports
+
+#    - name: Deploy local storage operator
+#      import_role:
+#        name: local_storage
