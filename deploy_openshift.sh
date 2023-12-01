@@ -147,5 +147,12 @@ echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
 echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
 echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
 
+# Wating for cluster to complete
+echo "Beyond this point this script can be Ctrl-C'd and the cluster formation will continue"
+echo "From here we are only providing status on the cluster install"
+
+openshift-install wait-for bootstrap-complete --log-level=debug --dir=/opt/openshift/cluster/
+
+openshift-install wait-for install-complete --log-level=debug --dir=/opt/openshift/cluster/
 
 #exit 0
