@@ -455,16 +455,16 @@
   file:
     path: "{{ kubeconfig | dirname }}"
     state: directory
-    mode: '0755'
+    mode: '0700'
 
 - name: Remove existing kube config
   file:
     path: "{{ kubeconfig }}"
     state: absent
 
-# Generally this copies the kubeconfig file to ~/.kube/config
 - name: Set kube config
   copy:
     src: "{{ ignition_configs }}/auth/kubeconfig"
     dest: "{{ kubeconfig }}"
+    mode: "0600"
     remote_src: true
