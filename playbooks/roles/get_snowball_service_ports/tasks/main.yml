@@ -6,7 +6,7 @@
 
 - name: Set non s3 endpoint IP
   set_fact:
-    non_s3_endpoint: "{{ non_s3_endpoint_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Host') }}"
+    non_s3_endpoint: "{{ non_s3_endpoint_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Host') | first }}"
 
 ##########################
 
@@ -16,7 +16,7 @@
 
 - name: Set S3 Bucket Endpoint
   set_fact:
-    s3_bucket_endpoint: "{{ s3_bucket_endpoint_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow bucket API endpoint`].Host') }}"
+    s3_bucket_endpoint: "{{ s3_bucket_endpoint_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow bucket API endpoint`].Host') | first }}"
 
 ####################################################
 
@@ -26,7 +26,7 @@
 
 - name: Set S3 Object Endpoint var
   set_fact:
-    s3_object_endpoint: "{{ s3_object_endpoint_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow object API endpoint`].Host') }}"
+    s3_object_endpoint: "{{ s3_object_endpoint_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow object API endpoint`].Host') | first }}"
 
 ####################################################
 
@@ -36,7 +36,7 @@
 
 - name: Set EC2 Port var
   set_fact:
-    ec2_port: "{{ ec2_port_info.stdout  | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Port') }}"
+    ec2_port: "{{ ec2_port_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Port') | first }}"
 
 #########################################################
 
@@ -48,7 +48,7 @@
 
 - name: Set STS Port var
   set_fact:
-    sts_port: "{{ sts_port_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Port') }}"
+    sts_port: "{{ sts_port_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Port') | first }}"
   when:
     - (sts_enabled | bool)
 
@@ -62,7 +62,7 @@
 
 - name: Set IAM port var
   set_fact:
-    iam_port: "{{ iam_port_info.stdout | from_json | community.general.json_query(''Endpoints[?Protocol==`https`].Port) }}"
+    iam_port: "{{ iam_port_info.stdout | from_json | community.general.json_query(''Endpoints[?Protocol==`https`].Port) | first }}"
   when:
     - (iam_enabled | bool)
 
@@ -76,7 +76,7 @@
 
 - name: Set SSM Port var
   set_fact:
-    ssm_port: "{{ ssm_port_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Port') }}"
+    ssm_port: "{{ ssm_port_info.stdout | from_json | community.general.json_query('Endpoints[?Protocol==`https`].Port') | first }}"
   when:
     - (ssm_enabled | bool)
 
@@ -88,7 +88,7 @@
 
 - name: Set S3 Bucket Port var
   set_fact:
-    s3_bucket_port: "{{ bucket_port_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow bucket API endpoint`].Port') }}"
+    s3_bucket_port: "{{ bucket_port_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow bucket API endpoint`].Port') | first }}"
 
 #####################################################################
 
@@ -98,4 +98,4 @@
 
 - name: Set S3 Object Port var
   set_fact:
-    s3_object_port: "{{ object_port_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow object API endpoint`].Port') }}"
+    s3_object_port: "{{ object_port_info.stdout | from_json | community.general.json_query('Endpoints[?Description==`s3-snow object API endpoint`].Port') | first }}"
