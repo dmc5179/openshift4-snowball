@@ -1,0 +1,22 @@
+---
+
+- name: Get Bootstrap instance info
+  ansible.builtin.shell: |
+    aws --profile snowballEdge --region snow --endpoint {{ sbe_endpoint }}:{{ ec2_port }} --ca-bundle {{ aws_certificate_bundle }} ec2 describe-instances
+  register: instance_info
+
+- name: Set Bootstap Instance ID
+  set_fact:
+    bootstrap_instance_id: "{{ instance_info.stdout | from_json | community.general.json_query('Reservations[].Instances[?Tags[0].Value==`Bootstrap`].InstanceId') | first }}"
+
+- name: Set Master 0 Instance ID
+  set_fact:
+    master0_instance_id: "{{ instance_info.stdout | from_json | community.general.json_query('Reservations[].Instances[?Tags[0].Value==`Master0`].InstanceId') | first }}"
+
+- name: Set Master 1 Instance ID
+  set_fact:
+    master0_instance_id: "{{ instance_info.stdout | from_json | community.general.json_query('Reservations[].Instances[?Tags[0].Value==`Master1`].InstanceId') | first }}"
+
+- name: Set Master 2 Instance ID
+  set_fact:
+    master0_instance_id: "{{ instance_info.stdout | from_json | community.general.json_query('Reservations[].Instances[?Tags[0].Value==`Master2`].InstanceId') | first }}"
