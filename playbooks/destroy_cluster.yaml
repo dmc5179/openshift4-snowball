@@ -13,19 +13,3 @@
     - name: Get cluster node instance IDs
       import_role:
         name: get_cluster_nodes
-
-    - name: Terminate Bootstrap Instance
-      ansible.builtin.command: aws --profile snowballEdge --region snow --endpoint {{ sbe_endpoint }}:{{ ec2_port }} --ca-bundle {{ aws_certificate_bundle }} ec2 terminate-instances --instance-ids {{ bootstrap_instance_id }}
-      when: bootstrap_instance_id | length > 0
-
-    - name: Terminate Master 0 Instance
-      ansible.builtin.command: aws --profile snowballEdge --region snow --endpoint {{ sbe_endpoint }}:{{ ec2_port }} --ca-bundle {{ aws_certificate_bundle }} ec2 terminate-instances --instance-ids {{ master0_instance_id }}
-      when: master0_instance_id | length > 0
-
-    - name: Terminate Master 1 Instance
-      ansible.builtin.command: aws --profile snowballEdge --region snow --endpoint {{ sbe_endpoint }}:{{ ec2_port }} --ca-bundle {{ aws_certificate_bundle }} ec2 terminate-instances --instance-ids {{ master1_instance_id }}
-      when: master1_instance_id | length > 0
-
-    - name: Terminate Master 2 Instance
-      ansible.builtin.command: aws --profile snowballEdge --region snow --endpoint {{ sbe_endpoint }}:{{ ec2_port }} --ca-bundle {{ aws_certificate_bundle }} ec2 terminate-instances --instance-ids {{ master2_instance_id }}
-      when: master2_instance_id | length > 0
