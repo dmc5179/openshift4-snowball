@@ -146,4 +146,10 @@ openshift-install wait-for bootstrap-complete --log-level=debug --dir=/opt/opens
 
 openshift-install wait-for install-complete --log-level=debug --dir=/opt/openshift/cluster/
 
+if [[ $? == 0 ]]
+then
+  echo "Cluster Install Complete. Destroying Bootstrap Node"
+  $EC2 terminate-instances --instance-ids ${BOOTSTRAP_INST_ID}
+fi
+
 #exit 0
