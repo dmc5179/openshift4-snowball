@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  snow_cert.pem: |
+{{ slurped_sbe_api_ca_bundle_64.content | b64decode | trim }}
+kind: ConfigMap
+metadata:
+  name: awscabundle
+  namespace: kube-system
