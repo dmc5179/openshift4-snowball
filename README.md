@@ -176,3 +176,10 @@ oc get co
 ```
 
 - Once the cluster is online the bootstrap node will need to be manually terminated
+
+# Destroying the Cluster
+
+- To destroy the OpenShift Cluster run the following script
+```
+destroy_cluster.sh
+```
