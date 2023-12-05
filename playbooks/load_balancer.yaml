@@ -4,6 +4,7 @@
   become: true
   tasks:
 
+      # Must use import_role due to tag usage
     - name: Install and Configure HAProxy for Load Balancing
-      include_role:
+      import_role:
         name: haproxy
