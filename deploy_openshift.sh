@@ -42,7 +42,58 @@ BOOTSTRAP_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
 
 echo "Bootstrap Instance ID: ${BOOTSTRAP_INST_ID}"
 
-# Need to wait for instance to reach a certain state before we can associate and address
+# Deploy Control Plane 0 node
+MASTER0_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${MASTER_UD}" \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master0}]' \
+  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
+
+echo "Master 0 Instance ID: ${MASTER0_INST_ID}"
+
+# Deploy Control Plane 1 node
+MASTER1_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${MASTER_UD}" \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master1}]' \
+  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
+
+echo "Master 1 Instance ID: ${MASTER1_INST_ID}"
+
+# Deploy Control Plane 2 node
+MASTER2_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
+  --user-data "file://${MASTER_UD}" \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master2}]' \
+  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
+
+echo "Master 2 Instance ID: ${MASTER2_INST_ID}"
+
+# Get private IPs of cluster nodes
+BOOTSTRAP_PRIVATE_IP=$($EC2 describe-instances --instance-id ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Bootstrap private ip: ${BOOTSTRAP_PRIVATE_IP}"
+ 
+MASTER0_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
+
+MASTER1_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
+
+MASTER2_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+
+echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
+
+# Reconfigure HA proxy with new private IP addresses
+echo "Deploying Load Balancer"
+pushd "${SCRIPT_DIR}/playbooks"
+ansible-playbook \
+  --extra-vars "ansible_python_interpreter=/usr/bin/python3.9 bootstrap_ip=${BOOTSTRAP_PRIVATE_IP} master0_ip=${MASTER0_PRIVATE_IP} master1_ip=${MASTER1_PRIVATE_IP} master2_ip=${MASTER2_PRIVATE_IP}" --tags reconfigure \
+  load_balancer.yaml
+popd
+
+# Wait for nodes to reach the running state and attach VNIs
+
+# Bootstrap
 state="x"
 until [[ "$state" == "running" ]]
 do
@@ -54,89 +105,50 @@ done
 
 $EC2 associate-address --instance-id ${BOOTSTRAP_INST_ID} --public-ip "${BOOTSTRAP_IP}"
 
-BOOTSTRAP_PRIVATE_IP=$($EC2 describe-instances --instance-id ${BOOTSTRAP_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-
-echo "Bootstrap private ip: ${BOOTSTRAP_PRIVATE_IP}"
-
-#exit 0
-
-#########################################################################################################
 # Master 0
 
-MASTER0_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
-  --user-data "file://${MASTER_UD}" \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master0}]' \
-  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
-
-echo "Master 0 Instance ID: ${MASTER0_INST_ID}"
-
-# Need to wait for instance to reach a certain state before we can associate and address
-until [[ `$EC2 describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+state="x"
+until [[ "$state" == "running" ]]
 do
   echo "Waiting for master 0 to reach running state for VNI attachment...."
-  echo -n "Current state: "
-  $EC2 describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  state=$($EC2 describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name')
+  echo "Current state: ${state} "
   sleep 5
 done
 
 $EC2 associate-address --instance-id ${MASTER0_INST_ID} --public-ip "${MASTER0_IP}"
 
-MASTER0_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-
-echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
-
-
 ############################################################################################################
 # Master 1
-MASTER1_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
-  --user-data "file://${MASTER_UD}" \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master1}]' \
-  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
-echo "Master 1 Instance ID: ${MASTER1_INST_ID}"
-
-# Need to wait for instance to reach a certain state before we can associate and address
-until [[ `$EC2 describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+state="x"
+until [[ "$state" == "running" ]]
 do
-  echo "Waiting for master 1 to reach running state for VNI attachment...."
-  echo -n "Current state: "
-  $EC2 describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  echo "Waiting for Master 1 to reach running state for VNI attachment...."
+  state=$($EC2 describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name')
+  echo "Current state: ${state} "
   sleep 5
 done
 
 $EC2 associate-address --instance-id ${MASTER1_INST_ID} --public-ip "${MASTER1_IP}"
 
-MASTER1_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-
-echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
-
 ##########################################################################################################
 # Master 2
-MASTER2_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
-  --user-data "file://${MASTER_UD}" \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Master2}]' \
-  --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
-echo "Master 2 Instance ID: ${MASTER2_INST_ID}"
-
-# Need to wait for instance to reach a certain state before we can associate and address
-until [[ `$EC2 describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
+state="x"
+until [[ "$state" == "running" ]]
 do
-  echo "Waiting for master 2 to reach running state for VNI attachment...."
-  echo -n "Current state: "
-  $EC2 describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'
+  echo "Waiting for Master 2 to reach running state for VNI attachment...."
+  state=$($EC2 describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name')
+  echo "Current state: ${state} "
   sleep 5
 done
 
 $EC2 associate-address --instance-id ${MASTER2_INST_ID} --public-ip "${MASTER2_IP}"
 
-MASTER2_PRIVATE_IP=$($EC2 describe-instances --instance-id ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-
-echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
-
-echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
-echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
-echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
+#echo "Master 0 private ip: ${MASTER0_PRIVATE_IP}"
+#echo "Master 1 private ip: ${MASTER1_PRIVATE_IP}"
+#echo "Master 2 private ip: ${MASTER2_PRIVATE_IP}"
 
 # Wating for cluster to complete
 echo "Beyond this point this script can be Ctrl-C'd and the cluster formation will continue"
