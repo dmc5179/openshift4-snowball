@@ -49,6 +49,15 @@
     mode: 0644
     validate: haproxy -f %s -c -q
   notify: restart haproxy
+  tags:
+    - reconfigure
+
+- name: restart haproxy
+  service:
+    name: haproxy
+    state: restarted
+  tags:
+    - reconfigure
 
 - name: Populate service facts
   service_facts:
@@ -71,7 +80,7 @@
     ('firewalld.service' in services) and
     (ansible_facts.services["firewalld.service"].state is match("running"))
 
-- name: Ensure HAProxy is started and enabled on boot.
+- name: Ensure HAProxy is restarted and enabled on boot.
   become: true
   service:
     name: haproxy
