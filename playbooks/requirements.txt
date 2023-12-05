@@ -7,3 +7,4 @@ botocore
 jmespath
 kubernetes
 cryptography
+kubernetes
