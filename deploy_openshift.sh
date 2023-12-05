@@ -34,11 +34,6 @@ popd
 
 #exit 0
 
-# TODO: Create jmes query from ec2 describe-instances to find OCP nodes
-# Write instance ids to file
-rm -f /tmp/ocp_instances.txt
-touch /tmp/ocp_instances.txt
-
 # Deploy Bootstrap node
 BOOTSTRAP_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --user-data "file://${BOOTSTRAP_UD}" \
@@ -46,7 +41,6 @@ BOOTSTRAP_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --instance-type ${BOOTSTRAP_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Bootstrap Instance ID: ${BOOTSTRAP_INST_ID}"
-echo "${BOOTSTRAP_INST_ID}" >> /tmp/ocp_instances.txt
 
 # Need to wait for instance to reach a certain state before we can associate and address
 state="x"
@@ -75,7 +69,6 @@ MASTER0_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Master 0 Instance ID: ${MASTER0_INST_ID}"
-echo "${MASTER0_INST_ID}" >> /tmp/ocp_instances.txt
 
 # Need to wait for instance to reach a certain state before we can associate and address
 until [[ `$EC2 describe-instances --instance-ids ${MASTER0_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
@@ -101,7 +94,6 @@ MASTER1_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Master 1 Instance ID: ${MASTER1_INST_ID}"
-echo "${MASTER1_INST_ID}" >> /tmp/ocp_instances.txt
 
 # Need to wait for instance to reach a certain state before we can associate and address
 until [[ `$EC2 describe-instances --instance-ids ${MASTER1_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
@@ -126,7 +118,6 @@ MASTER2_INST_ID=$(${EC2} run-instances --image-id ${RHCOS_BASE_AMI_ID} \
   --instance-type ${MASTER_INSTANCE_TYPE} | jq -r '.Instances[0].InstanceId')
 
 echo "Master 2 Instance ID: ${MASTER2_INST_ID}"
-echo "${MASTER2_INST_ID}" >> /tmp/ocp_instances.txt
 
 # Need to wait for instance to reach a certain state before we can associate and address
 until [[ `$EC2 describe-instances --instance-ids ${MASTER2_INST_ID} | jq -r '.Reservations[0].Instances[0].State.Name'` == "running" ]]
