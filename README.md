@@ -183,3 +183,22 @@ oc get co
 ```
 destroy_cluster.sh
 ```
+
+# Configuring the snowball with an NTP server
+- Run the following command to configure the snowball device with an NTP server. Change the NTP server to one that is accessibly from your environment
+```
+snowballEdge update-time-servers ${SBE_OPTS} pool.ntp.org
+```
+
+- It can take several minutes for the time server to update. An example of a working configuration is below
+```
+snowballEdge describe-time-sources ${SBE_OPTS}
+{
+  "Sources" : [ {
+    "Address" : "<ntp server IP address>",
+    "State" : "CURRENT",
+    "Type" : "SERVER",
+    "Stratum" : 2
+  } ]
+}
+```
