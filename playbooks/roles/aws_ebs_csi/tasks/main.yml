@@ -1,51 +1,56 @@
 ---
 
-#- name: Add AWS EBS CSI helm repo
-#  kubernetes.core.helm_repository:
-#    name: aws-ebs-csi-driver
-#    repo_url: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+- name: Add AWS EBS CSI helm repo
+  kubernetes.core.helm_repository:
+    name: aws-ebs-csi-driver
+    repo_url: "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
 
-#- name: Update the repository cache
-#  kubernetes.core.helm:
-#    name: foo
-#    namespace: kube-system
-#    state: absent
-#    update_repo_cache: true
+- name: Update the repository cache
+  kubernetes.core.helm:
+    name: foo
+    namespace: kube-system
+    state: absent
+    update_repo_cache: true
 
 - name: Get AWS access key from CLI credentials file
   ansible.builtin.set_fact:
       aws_access_key_id: "{{ lookup( 'ini', 'aws_access_key_id section=snowballEdge file={{ ansible_env.HOME }}/.aws/credentials' ) }}"
       aws_secret_access_key: "{{ lookup( 'ini', 'aws_secret_access_key section=snowballEdge file={{ ansible_env.HOME }}/.aws/credentials' ) }}"
 
-  #TODO: Change this to an ansible k8s task
 - name: Create AWS Credentials Secret
-  ansible.builtin.command: oc create secret generic aws-secret --namespace kube-system --from-literal "key_id={{ aws_access_key_id }}" --from-literal "access_key={{ aws_secret_access_key }}"
-  ignore_errors: true
-#  kubernetes.core.k8s:
-#    state: present
-#    namespace: kube-system
-#    wait: true
-#    definition:
-#      apiVersion: v1
-#      data:
-#        access_key: "{{ aws_access_key_id | b64encode }}"
-#        key_id: "{{ aws_secret_access_key | b64encode }}"
-#      kind: Secret
-#      metadata:
-#        name: aws-secret
-#        namespace: kube-system
-#      type: Opaque
-#    template: "{{ playbook_dir }}/roles/aws_ebs_csi/templates/aws-secret.yaml.j2"
+  kubernetes.core.k8s:
+    state: present
+    namespace: kube-system
+    wait: true
+    definition:
+      apiVersion: v1
+      data:
+        access_key: "{{ aws_access_key_id | b64encode | trim }}"
+        key_id: "{{ aws_secret_access_key | b64encode | trim }}"
+      kind: Secret
+      metadata:
+        name: aws-secret
+        namespace: kube-system
+      type: Opaque
 
-  #TODO: Change this to an ansible k8s task
+- name: set ec2 endpoint fact
+  set_fact:
+    ec2_endpoint: "{{ non_s3_endpoint }}:{{ ec2_port }}"
+
 - name: Create secret with the SBE EC2 endpoint and port
-  ansible.builtin.command: oc create secret generic aws-meta --namespace kube-system --from-literal "endpoint=https://{{ non_s3_endpoint }}:{{ ec2_port }}"
-  ignore_errors: true
-#  kubernetes.core.k8s:
-#    state: present
-#    namespace: kube-system
-#    wait: true
-#    template: 'aws-meta.yaml.j2'
+  kubernetes.core.k8s:
+    state: present
+    namespace: kube-system
+    wait: true
+    definition:
+      apiVersion: v1
+      data:
+        endpoint: "{{ ec2_endpoint | b64encode | trim }}"
+      kind: Secret
+      metadata:
+        name: aws-meta
+        namespace: kube-system
+      type: Opaque
 
 - name: Slurp Snowball CA
   ansible.builtin.slurp:
@@ -79,14 +84,17 @@
     wait: true
     definition: '{{ aws_ca_bundle_spaced.stdout | from_yaml }}'
 
-#- name: Ensure helm values temp location is free
-#  ansible.builtin.file:
-#    path: "/tmp/values.yaml"
-#    state: absent
+- name: Make a copy of the helm chart values file
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/roles/aws_ebs_csi/templates/values.yaml"
+    dest: "/tmp/values.yaml"
+    force: true
+    mode: '0644'
 
-- name: Create helm chart values file from template
+  # Has to be done this way because the values file contains invalid Jinja2 syntax
+- name: Update helm chart values file with SBE endpoints
   ansible.builtin.replace:
-    path: "{{ playbook_dir }}/roles/aws_ebs_csi/templates/values.yaml"
+    path: "/tmp/values.yaml"
     regexp: 'snowball_ec2_endpoint'
     replace: "https://{{ non_s3_endpoint }}:{{ ec2_port }}"
 
@@ -96,4 +104,9 @@
     namespace: kube-system
     chart_ref: aws-ebs-csi-driver/aws-ebs-csi-driver
     values_files:
-      - "{{ playbook_dir }}/roles/aws_ebs_csi/templates/values.yaml"
+      - "/tmp/values.yaml"
+
+- name: Cleanup temp helm values file
+  ansible.builtin.file:
+    path: "/tmp/values.yaml"
+    state: absent
