@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  gather_facts: true
+  become: false
+  tasks:
+
+    - name: Get snowball service endpoints and ports
+      include_role:
+        name: get_snowball_service_ports
+
+    - name: configure aws and snowball bash aliases
+      include_role:
+        name: configure_aliases
