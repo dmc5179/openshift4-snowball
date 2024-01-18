@@ -98,27 +98,3 @@ sed -i "s|export S3_BUCKET_PORT=.*|export S3_BUCKET_PORT=\"$s3_bucket_port\"|" "
 sed -i "s|export S3_OBJECT_PORT=.*|export S3_OBJECT_PORT=\"$s3_object_port\"|" "${SCRIPT_DIR}/env.sh"
 
 exit 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
