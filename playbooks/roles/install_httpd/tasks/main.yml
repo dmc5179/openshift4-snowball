@@ -143,16 +143,19 @@
   ansible.builtin.file:
     path: "/var/www/html/ignition"
     state: directory
+    mode: 0755
 
 - name: configure bootstrap ignition loader
   ansible.builtin.template:
     src: merge_bootstrap.ign.j2
     dest: "/var/www/html/ignition/merge_bootstrap.ign"
+    mode: 0644
 
 - name: configure master ignition loader
   ansible.builtin.template:
     src: merge_master.ign.j2
     dest: "/var/www/html/ignition/merge_master.ign"
+    mode: 0644
 
 - name: start and enable httpd
   ansible.builtin.service:
