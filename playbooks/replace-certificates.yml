@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+
+  tasks:
+
+#    - name: Include vars
+#      ansible.builtin.include_vars: defaults/main.yml
+
+    - name: Replace quay certificates
+      import_role:
+        name: replace_quay_certificates
+
+#    - name: Include tasks to update oc mirror metadata files
+#      ansible.builtin.include_tasks: tasks/update-metadata-files.yml
